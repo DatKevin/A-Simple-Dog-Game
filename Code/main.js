@@ -7,34 +7,49 @@ let buildingstype = []
 
 let triggerTreatFarm = false
 
-let treatsPerSecond = 1
+let treatsBase = 0
+let treatsMultiplier = 0
+let treatsPerSecond =  (treatsMultiplier + 1) + treatsBase 
+
+let updateProductionValues = function() {
+	for(let i = 0; i<buildingstype.length; i++) {
+		if (buildingstype[i].resource == "treats") {
+			let increase = (buildingstype[i].rate * buildingstype[i].number)
+			treatsBase += increase
+			console.log(increase + "increase")
+			console.log(treatsBase + "base")
+			treatsPerSecond =  (treatsMultiplier + 1) + treatsBase 
+		}
+	}	
+}
 
 class Buildings {
 	constructor(name, resource, rate) {
 		this.name = name;
 		this.number = 0;
-		this.produces = resource
-		this.rate = rate
+		this.resource = resource;
+		this.rate = rate;	
 	}
 }
 
-let addnew = function() {	
-	newbuilding.number += 1
-}
-
 //Dynamically adds new buildings 
-let unlock = function(name) {
-	let arrayelement = new Buildings(name)
+let unlock = function(name, resource, rate) {
+	let addnew = function() {	
+		arrayelement.number += 1
+		updateProductionValues()
+		console.log(arrayelement.number)
+	}
+	let arrayelement = new Buildings(name, resource, rate)
 	buildingstype.push(arrayelement)	
 	let newbuilding = document.createElement("span")
 	newbuilding.innerText = arrayelement.name
 	newbuilding.addEventListener("click", addnew)
 	buildingList.append(newbuilding)
-	console.log("It works!")
 }
 
 let increaseTreat = function() {
-	treatsValue.innerText = Number(treatsValue.innerText) + 2
+	treatsValue.innerText = Number(treatsValue.innerText) + treatsPerSecond
+	console.log(buildingstype)
 }
 
 //Add Treat Button
@@ -45,8 +60,10 @@ let addTreat = function() {
 let unlocklist = function() {
 	if (Number(treatsValue.innerText) >= 5 && triggerTreatFarm == false) {
 		triggerTreatFarm = true
-		unlock("Treats Farm","treats", "1")
+		unlock("Treats Farm","treats", 1)
 	}
+	updateProductionValues()
+
 }
 
 
@@ -58,3 +75,4 @@ let incrementalchecker = function() {
 }
 
 incrementalchecker()
+
