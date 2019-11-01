@@ -8,5 +8,5 @@ With more resources, the page will also dynamically add buttons and options to c
 
 The game will continuously grow as upgrades are unlocked and the dog civilization grows bigger and bigger. Once the user has unlocked a certain upgrade and have obtained the resources to complete the upgrade, the game is over and they are declared the winner. 
 
-![Image of Opening](Opening-Screen.jpg)
-![Image of Mid](Mid-Game-Screen.jpg)
+![Image of Opening](Opening-Screen)
+![Image of Mid](Mid-Game-Screen)
