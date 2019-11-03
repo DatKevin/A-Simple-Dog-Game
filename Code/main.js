@@ -16,6 +16,7 @@ let updateProductionValues = function() {
 		resource.base = (buildingStats[i].rate * buildingStats[i].number)
 		resource.multiplier = (buildingStats[i].multiplier * buildingStats[i].number)
 		resource.updateResource()
+		console.log(buildingStats)
 	}	
 }
 //Instntly pulls resource stats from array
@@ -50,7 +51,7 @@ class Resource {
 	}
 	//updates the rate per second
 	updateResource () {
-		this.persecond = (this.base + 1) + this.base
+		this.persecond = (this.multiplier + 1) * this.base
 	}
 }
 
@@ -93,7 +94,8 @@ let unlock = function(name, resource, rate, multiplier) {
 let increaseTreat = function() {
 	let treats = findResource("Treats")
 	let valueText = document.querySelector(".resourcevalue.Treats")
-	valueText.innerText = treats.value + treats.persecond
+	treats.value = treats.value + treats.persecond
+	valueText.innerText = treats.value 
 	console.log(resourceStats)
 }
 
@@ -103,7 +105,7 @@ let addTreat = function() {
 	treats.value += 1
 	let valueText = document.querySelector(".resourcevalue.Treats")
 	treats.updateResource
-	valueText.innerText = treats.value + treats.persecond	
+	valueText.innerText = treats.value	
 }
 
 //List of unlockables that dynamically adds them
@@ -118,7 +120,6 @@ let unlocklist = function() {
 	//More Dogs are obtained when enough treat farms are created
 	for (let i = 0; i < buildingStats; i++)
 		if (buildingStats[i].name == "Treats Farm" && buildingStats[i].number == 5) {
-
 		}
 
 }
