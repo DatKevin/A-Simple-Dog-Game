@@ -1,0 +1,24 @@
+h1 {
+	text-align: center;
+}
+
+.buildingslist {
+	text-align: center;
+}
+
+.resourcelist {
+	text-align: left
+
+}
+
+h3 {
+	text-align: center;
+
+}
+
+.resourcename {
+	border-style: solid;
+	padding: 10px;
+	display: inline;
+}
+
