@@ -8,6 +8,9 @@ let resourceStats = []
 
 //Unlockables start off as false and turn true as they become unlocked
 let triggerTreatFarm = false
+let triggerDogRate = false
+let triggerBorrows = false
+let triggerSticks = false
 
 //Checks all building types and updates the production value of that resource
 let updateProductionValues = function() {
@@ -19,7 +22,7 @@ let updateProductionValues = function() {
 		console.log(buildingStats)
 	}	
 }
-//Instntly pulls resource stats from array
+//Instntly pulls resource/building stats from array
 let findResource = function(name) {
 	for (let i = 0; i < resourceStats.length; i++) {
 		if (resourceStats[i].name == name) {
@@ -28,14 +31,25 @@ let findResource = function(name) {
 	}
 }
 
+let findBuilding = function(name) {
+	for (let i = 0; i < buildingStats.length; i++) {
+		if (buildingStats[i].name == name) {
+			return buildingStats[i]
+		}
+	}
+}
+
 //Makes buildings. Rate is Addictive while multiplier is multiplicative.
 class Building {
-	constructor(name, resource, rate, multiplier) {
+	constructor(name, number, resource, rate, multiplier, cost, costgrowth, costresource) {
 		this.name = name;
-		this.number = 0;
+		this.number = number;
 		this.resource = resource;
 		this.rate = rate;	
 		this.multiplier = multiplier
+		this.cost = cost
+		this.costgrowth = costgrowth
+		this.costresource = costresource
 	}
 }
 
@@ -76,26 +90,72 @@ let unlockResource = function(name, value) {
 }
 
 //Dynamically adds new buildings and gives them functionality
-let unlock = function(name, resource, rate, multiplier) {
-	let addnew = function() {	
-		arrayelement.number += 1
-		updateProductionValues()
-		console.log(arrayelement.number)
+let unlockBuilding = function(name, number, resource, rate, multiplier, cost, costgrowth, costresource) {
+	//Increases the number of the respective building and reduces resource as a cost
+	let addnew = function() {
+		let resource = findResource(arrayelement.costresource)
+		if (resource.value >= arrayelement.cost) {	
+			arrayelement.number += 1
+			resource.value -= arrayelement.cost
+			arrayelement.cost *= arrayelement.costgrowth
+
+			buildingnumber.innerText = " Number: " + Math.round(arrayelement.number)
+			buildingcost.innerText = " Cost: " + Math.round(arrayelement.cost) + " " + arrayelement.costresource
+
+			updateProductionValues()
+			console.log(arrayelement.number)
+		}
+		console.log("Button works")
 	}
-	let arrayelement = new Building(name, resource, rate, multiplier)
+	let arrayelement = new Building(name, number, resource, rate, multiplier, cost, costgrowth, costresource)
 	buildingStats.push(arrayelement)
+	
 	let newbuilding = document.createElement("span")
 	newbuilding.innerText = name
 	newbuilding.addEventListener("click", addnew)
+	newbuilding.classList.add("buildingname")
+	newbuilding.classList.add(name)
+
+	let buildingnumber = document.createElement("span")
+	buildingnumber.innerText = " Number: " + number
+	buildingnumber.classList.add("buildingnumber")
+	buildingnumber.setAttribute("type", "number")
+
+	let buildingcost = document.createElement("span")
+	buildingcost.innerText = " Cost: " + cost + " " + costresource 
+	buildingnumber.classList.add("buildingcost")
+	buildingnumber.setAttribute("type", "number")
+
+	newbuilding.append(buildingnumber)
+	newbuilding.append(buildingcost)
 	buildingList.append(newbuilding)
 }
 
 //Increments the Resources based on thier caclulated amount
-let increaseTreat = function() {
-	let treats = findResource("Treats")
-	let valueText = document.querySelector(".resourcevalue.Treats")
-	treats.value = treats.value + treats.persecond
-	valueText.innerText = treats.value 
+let increment = function() {
+	let dogs = findResource("Dogs")
+
+	//Dogs like to fetch sticks constantly
+	let sticks = findResource("Sticks")
+	if (sticks != undefined) {
+		sticks.value += dogs.value * 0.2
+	}
+
+	//Increments through 
+	for (let i = 0; i < resourceStats.length; i++) {
+		let element = resourceStats[i]
+		let elementValue = document.querySelector(".resourcevalue" + "." + element.name)
+		element.value += element.persecond
+		elementValue.innerText = Math.round(element.value)
+		console.log(resourceStats)
+	}
+	//Caps the number of dogs = to the value of the burrows
+	let burrows = findBuilding("Burrows")
+	if (dogs.value >= (burrows.number * 5)) {
+		dogs.value = burrows.number * 5
+	}
+	let dogvalue = document.querySelector(".resourcevalue.Dogs")
+	dogvalue.innerText = dogs.value
 	console.log(resourceStats)
 }
 
@@ -104,36 +164,51 @@ let addTreat = function() {
 	let treats = findResource("Treats")
 	treats.value += 1
 	let valueText = document.querySelector(".resourcevalue.Treats")
-	treats.updateResource
-	valueText.innerText = treats.value	
+	valueText.innerText = Math.round(treats.value)	
 }
 
 //List of unlockables that dynamically adds them
 let unlocklist = function() {
 	//Treat Farm unlocks once x Treats have been obtained
 	let treats = findResource("Treats")
+	let dogs = findResource("Dogs")
+	let sticks = findResource("Sticks")
+	let treatsFarm = findBuilding("TreatsFarm")
+	let burrows = findBuilding("Burrows")
+		
 	if (treats.value >= 5 && triggerTreatFarm == false) {
 		triggerTreatFarm = true
-		unlock("Treats Farm","Treats", 1, 0)
+		unlockBuilding("TreatsFarm", 0, "Treats", 1, 0, 10, 1.1, "Treats")
 	}
 
-	//More Dogs are obtained when enough treat farms are created
-	for (let i = 0; i < buildingStats; i++)
-		if (buildingStats[i].name == "Treats Farm" && buildingStats[i].number == 5) {
-		}
+	//Dogs start to come in and borrows are created to house the dog
+	if (treatsFarm.number >= 3 && triggerDogRate == false) {
+		triggerDogRate = true
+		
+		unlockResource("Dogs", 1)
+		let dogs = findResource("Dogs")
+		dogs.persecond += 1
+		
+		unlockBuilding("Burrows", 1, undefined, 0, 0, 5, 1.2, "Sticks")
+		let burrows = findBuilding("Burrows")
+	}
 
+	//Dogs like to fetch sticks
+	if (dogs.value >= 1 && triggerSticks == false) {
+		triggerSticks = true
+		unlockResource("Sticks",0)
+	}
 }
 
 treatsButton.addEventListener("click",addTreat)
 
 //Unlocks default resources
-unlockResource("Dogs", 1)
 unlockResource("Treats", 0)
 
 //Constantly increments and checks to see if unlock conditions have been met
 let incrementalchecker = function() {
 	setInterval(unlocklist, 1000)
-	setInterval(increaseTreat, 1000)
+	setInterval(increment, 1000)
 }
 
 incrementalchecker()

@@ -17,8 +17,16 @@ h3 {
 }
 
 .resourcename {
-	border-style: solid;
 	padding: 10px;
 	display: inline;
 }
 
+.resourcename::before {
+	content: "\A";
+	white-space: pre;
+}
+
+.buildingname::before {
+	content: "\A";
+	white-space: pre;
+}
