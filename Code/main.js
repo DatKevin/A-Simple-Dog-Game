@@ -1,3 +1,4 @@
+//Grabs game opening assets
 let treatsButton = document.querySelector(".gettreats")
 let buildingList = document.querySelector(".buildingslist")
 let resourceList = document.querySelector(".resourcelist")
@@ -7,6 +8,7 @@ let buildingStats = []
 let resourceStats = []
 let dogjobStats = []
 
+//Used for capping total number of dogs with thier jobs
 let holdvalue = 0
 
 //Unlockables start off as false and turn true as they become unlocked
@@ -17,7 +19,8 @@ let triggerSticks = false
 let triggerDogFarmer = false
 let triggerDogFetcher = false
 
-//Checks all building types and updates the production value of that resource
+
+//Iterates through all buildings and updates the production value of that resource
 let updateProductionValues = function() {
 	for(let i = 0; i<buildingStats.length; i++) {
 		let resource = findResource(buildingStats[i].resource)
@@ -27,7 +30,7 @@ let updateProductionValues = function() {
 		console.log(buildingStats)
 	}	
 }
-//Instntly pulls resource/building stats from array
+//Instntly pulls resource/building/dog job stats from array
 let findResource = function(name) {
 	for (let i = 0; i < resourceStats.length; i++) {
 		if (resourceStats[i].name == name) {
@@ -35,7 +38,6 @@ let findResource = function(name) {
 		}
 	}
 }
-
 let findBuilding = function(name) {
 	for (let i = 0; i < buildingStats.length; i++) {
 		if (buildingStats[i].name == name) {
@@ -43,7 +45,6 @@ let findBuilding = function(name) {
 		}
 	}
 }
-
 let findDogJob = function(name) {
 	for (let i = 0; i < dogjobStats.length; i++) {
 		if (dogjobStats[i].name == name) {
@@ -51,6 +52,7 @@ let findDogJob = function(name) {
 		}
 	}
 }
+
 
 //Makes buildings. Rate is Addictive while multiplier is multiplicative.
 class Building {
@@ -65,8 +67,6 @@ class Building {
 		this.costresource = costresource
 	}
 }
-
-
 //Makes resources and allows for adding new resources and updates
 class Resource {
 	constructor(name, value) {
@@ -81,7 +81,7 @@ class Resource {
 		this.persecond = (this.multiplier + 1) * this.base
 	}
 }
-
+//Makes new Dog Jobs
 class DogJobs {
 	constructor(name, resource, rate) {
 		this.name = name
@@ -110,12 +110,11 @@ let unlockResource = function(name, value) {
 	newresource.append(newresourcevalue)
 	resourceList.append(newresource)
 }
-
 //Dynamically adds new buildings and gives them functionality
 let unlockBuilding = function(name, number, resource, rate, multiplier, cost, costgrowth, costresource) {
-	//Increases the number of the respective building and reduces resource as a cost
 	let addnew = function() {
 		let resource = findResource(arrayelement.costresource)
+		//Checks if the cost for the building is available and reduces resources accordingly
 		if (resource.value >= arrayelement.cost) {	
 			arrayelement.number += 1
 			resource.value -= arrayelement.cost
@@ -129,6 +128,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier, cost, co
 		}
 		console.log("Button works")
 	}
+	//creates the new building and dynamically adds it to the list
 	let arrayelement = new Building(name, number, resource, rate, multiplier, cost, costgrowth, costresource)
 	buildingStats.push(arrayelement)
 	
@@ -179,6 +179,7 @@ let unlockDogJob = function(name,resource,rate) {
 		}
 	}
 
+	//Dynamically adds new dog jobs to the list
 	let arrayelement = new DogJobs(name, resource, rate)
 	dogjobStats.push(arrayelement)
 	let newdogjob = document.createElement("span")
@@ -234,27 +235,21 @@ let increment = function() {
 	}
 	//Caps the number of dogs = to the value of the burrows
 	let burrows = findBuilding("Burrows")
-	
 	let calculatetotaldogs = function() {
 		let total = 0
 		for (let k = 0; k < dogjobStats.length; k++) {
 			total += dogjobStats[k].number
-			console.log("Inside total" + total)
 		}
 		total += dogs.value
 		return total
 	}
-	console.log(calculatetotaldogs() + "Total")
 	if (calculatetotaldogs() >= (burrows.number * 5) && holdvalue == 0) {
 		holdvalue = dogs.persecond
 		dogs.persecond = 0
-		console.log("If worked")
-
 	}
 	if (calculatetotaldogs() < burrows.number * 5 && holdvalue != 0) {
 		dogs.persecond = holdvalue
 		holdvalue = 0
-		console.log("If Else worked")
 	}
 
 	let dogvalue = document.querySelector(".resourcevalue.Dogs")
@@ -308,19 +303,17 @@ let unlocklist = function(name, resource, rate) {
 	if (treatsFarm.number >= 5 && triggerDogFarmer == false) {
 		triggerDogFarmer = true
 		unlockDogJob("DogFarmer","Treats", 2)
-		console.log("Dogfarm trigger")
 	}	
-
 	if (burrows.number >= 1 && triggerDogFetcher == false) {
 		triggerDogFetcher = true
 		unlockDogJob("DogFetcher","Sticks", 2)
 	}
 }
 
-treatsButton.addEventListener("click",addTreat)
 
-//Unlocks default resources
+//Unlocks default resources and button
 unlockResource("Treats", 0)
+treatsButton.addEventListener("click",addTreat)
 
 //Constantly increments and checks to see if unlock conditions have been met
 let incrementalchecker = function() {
@@ -328,5 +321,6 @@ let incrementalchecker = function() {
 	setInterval(increment, 1000)
 }
 
+//Starts the game
 incrementalchecker()
 

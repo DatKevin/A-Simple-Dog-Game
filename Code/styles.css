@@ -30,3 +30,8 @@ h3 {
 	content: "\A";
 	white-space: pre;
 }
+
+.dogjobname::before {
+	content: "\A";
+	white-space: pre;
+}
