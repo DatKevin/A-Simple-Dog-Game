@@ -3,6 +3,9 @@ let treatsButton = document.querySelector(".gettreats")
 let buildingList = document.querySelector(".buildingslist")
 let resourceList = document.querySelector(".resourcelist")
 
+//textbox for player
+let textbox = document.querySelector(".dialogue")
+
 //Records all building and resource stats
 let buildingStats = []
 let resourceStats = []
@@ -18,7 +21,8 @@ let triggerBorrows = false
 let triggerSticks = false
 let triggerDogFarmer = false
 let triggerDogFetcher = false
-
+let triggerGaurdDog = false
+let triggerCatAttack = false
 
 //Iterates through all buildings and updates the production value of that resource
 let updateProductionValues = function() {
@@ -118,10 +122,12 @@ let unlockBuilding = function(name, number, resource, rate, multiplier, cost, co
 		if (resource.value >= arrayelement.cost) {	
 			arrayelement.number += 1
 			resource.value -= arrayelement.cost
+			let resourceValueText = document.querySelector(".resourcevalue." + resource.name)
+			resourceValueText.innerText = Math.floor(resource.value)
 			arrayelement.cost *= arrayelement.costgrowth
 
-			buildingnumber.innerText = " Number: " + Math.round(arrayelement.number)
-			buildingcost.innerText = " Cost: " + Math.round(arrayelement.cost) + " " + arrayelement.costresource
+			buildingnumber.innerText = " Number: " + Math.floor(arrayelement.number)
+			buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost) + " " + arrayelement.costresource
 
 			updateProductionValues()
 			console.log(arrayelement.number)
@@ -159,22 +165,22 @@ let unlockDogJob = function(name,resource,rate) {
 
 	//Function to add dog to new job
 	let addDog = function () {
-		if (dogs.value > 0) {
+		if (dogs.value >= 1) {
 			dogs.value -= 1
 			arrayelement.number += 1
 			let valueText = document.querySelector(".resourcevalue.Dogs")
-			valueText.innerText = Math.round(dogs.value)
+			valueText.innerText = Math.floor(dogs.value)
 			newdogjobvalue.innerText = arrayelement.number
 		}
 	}
 
 	//function to remove dog from job
 	let removeDog = function() {
-		if (arrayelement.number > 0) {
+		if (arrayelement.number >= 1) {
 			dogs.value += 1
 			arrayelement.number -= 1
 			let valueText = document.querySelector(".resourcevalue.Dogs")
-			valueText.innerText = Math.round(dogs.value)
+			valueText.innerText = Math.floor(dogs.value)
 			newdogjobvalue.innerText = arrayelement.number
 		}
 	}
@@ -194,7 +200,8 @@ let unlockDogJob = function(name,resource,rate) {
 
 	newdogjobvalue.setAttribute("type", "number")
 	newdogjobvalue.innerText = arrayelement.number
-
+	newdogjobvalue.classList.add("dogjobvalue")
+	newdogjobvalue.classList.add(name)
 
 	addbutton.addEventListener("click", addDog)
 	addbutton.classList.add("addbutton")
@@ -212,6 +219,16 @@ let unlockDogJob = function(name,resource,rate) {
 	joblist.append(removebutton)
 }
 
+//Calculates running total of dogs with all thier jobs
+let totaldogs = function() {
+	let dogs = findResource("Dogs")
+	let total = 0
+	for (let k = 0; k < dogjobStats.length; k++) {
+		total += dogjobStats[k].number
+	}
+	total += dogs.value
+	return total
+}
 
 //Increments the Resources based on thier caclulated amount
 let increment = function() {
@@ -226,55 +243,118 @@ let increment = function() {
 		}
 	}
 
-	//Calculates running total of dogs with all thier jobs
-	let calculatetotaldogs = function() {
-		let total = 0
-		for (let k = 0; k < dogjobStats.length; k++) {
-			total += dogjobStats[k].number
-		}
-		total += dogs.value
-		return total
-	}
-
 	//Increments through 
 	for (let i = 0; i < resourceStats.length; i++) {
 		let element = resourceStats[i]
 		let elementValue = document.querySelector(".resourcevalue" + "." + element.name)
 		element.value += element.persecond
+
 		//Dogs eat treats! They will reduce the value of treats
-		if (element.name == "Treats") {
-			element.value -= calculatetotaldogs() * 1
+		if (element.name == "Treats" && dogs != undefined) {
+			element.value -= totaldogs() * 1
 			//if there aren't enough treats, dogs will start to die
 			if (element.value < 0) {
 				element.value = 0
 				if (dogs.value > 0) {
 					dogs.value -= 1
+					let dogtextvalue = document.querySelector(".resourcevalue.Dogs")
+					dogtextvalue.innerText = dogs.value
+					textbox.append("A dog has died of starvation :c \n \n")	
 				}
 				else {
 					for (let j = 0; j < dogjobStats.length; j++) {
 						if (dogjobStats[j].number > 0) {
-							dogjobStats[j].number -= 1
+							dogjobStats[j].number -= 1								
+							let specialdogtextvalue = document.querySelector(".dogjobvalue." + dogjobStats[j].name)
+							specialdogtextvalue.innerText = dogjobStats[j].number
+							textbox.append("A dog has died of starvation :c \n \n")
 						}
-					}
+					}	
 				}
 			}
 		}
-		elementValue.innerText = Math.round(element.value)
+		elementValue.innerText = Math.floor(element.value)
 	}
 
 	//Caps the number of dogs = to the value of the burrows
 	let burrows = findBuilding("Burrows")
-	if (calculatetotaldogs() >= (burrows.number * 5) && holdvalue == 0) {
+	if (totaldogs() >= (burrows.number * 5) && holdvalue == 0) {
 		holdvalue = dogs.persecond
 		dogs.persecond = 0
 	}
-	if (calculatetotaldogs() < burrows.number * 5 && holdvalue != 0) {
+	if (totaldogs() < burrows.number * 5 && holdvalue != 0) {
 		dogs.persecond = holdvalue
 		holdvalue = 0
 	}
 	let dogvalue = document.querySelector(".resourcevalue.Dogs")
-	dogvalue.innerText = dogs.value
+	dogvalue.innerText = Math.floor(dogs.value)
 	console.log(resourceStats)
+
+	//Triggers Cat attack on random values
+	if (triggerCatAttack == true) {
+		let randomNumber = Math.floor(Math.random() * 10) + 1
+		console.log(randomNumber)
+		//They attack at x % rate
+		if (randomNumber <= 1) {
+			textbox.append("The cats have attacked! \n")
+			let catAttack = 2
+			let guard = findDogJob("GuardDog")
+			let difference = guard.number - catAttack
+
+			//battle results are calculated
+			if (difference >= 0) {
+				textbox.append("The dogs have defended the attack! \n \n")
+			}
+
+			//lives are lost in Gaurd Dogs > regular Dogs > other Dogs
+			else {
+				difference = Math.abs(difference)
+				let totaldeaths = 0
+				for (let i = 1; i <= difference; i++){
+					let once = false
+					if (guard.number > 0) {
+						guard.number -= 1
+						totaldeaths += 1
+						let gaurdvalue = document.querySelector(".dogjobvalue" + gaurd.name)
+						gaurdvalue.innerText = gaurd.number
+					}
+					else if (dogs.value > 0) {
+						dogs.value -= 1
+						totaldeaths += 1
+						let dogtextvalue = document.querySelector(".resourcevalue.Dogs")
+						dogtextvalue.innerText = dogs.value
+					}
+					else {
+						for (let j = 0; j < dogjobStats.length; j++) {
+							if (once == false) {
+								if (dogjobStats[j].number > 0) {
+									once = true
+									dogjobStats[j].number -= 1
+									totaldeaths += 1
+									let specialdogtextvalue = document.querySelector(".dogjobvalue." + dogjobStats[j].name)
+									specialdogtextvalue.innerText = dogjobStats[j].number
+								}
+							}
+						}	
+					}
+				}
+				if (totaldeaths == 1) {
+					textbox.append("A dog has lost its life in battle... \n \n")
+				}
+				else {
+					textbox.append(totaldeaths + " dogs have lost thier lives in the attack... \n \n")
+				}
+			}
+		}
+	}
+
+	//Updates total number of dogs
+	let totaldogcount = document.querySelector(".resourcevalue.TotalDogs")
+	totaldogcount.innerText = totaldogs()
+
+
+	//scrolls textbox to bottom
+	textbox.scrollTop = textbox.scrollHeight 
 }
 
 //Add Treat Button
@@ -282,7 +362,7 @@ let addTreat = function() {
 	let treats = findResource("Treats")
 	treats.value += 1
 	let valueText = document.querySelector(".resourcevalue.Treats")
-	valueText.innerText = Math.round(treats.value)	
+	valueText.innerText = Math.floor(treats.value)	
 }
 
 //List of unlockables that dynamically adds them
@@ -298,7 +378,7 @@ let unlocklist = function(name, resource, rate) {
 		
 	if (treats.value >= 5 && triggerTreatFarm == false) {
 		triggerTreatFarm = true
-		unlockBuilding("TreatsFarm", 0, "Treats", 1, 0, 3, 1.1, "Treats")
+		unlockBuilding("TreatsFarm", 0, "Treats", 1.25, 0, 3, 1.1, "Treats")
 	}
 
 	//Dogs start to come in and borrows are created to house the dog
@@ -307,26 +387,62 @@ let unlocklist = function(name, resource, rate) {
 		
 		unlockResource("Dogs", 1)
 		let dogs = findResource("Dogs")
-		dogs.persecond += 0.5
+		dogs.persecond += 1
+		textbox.append("The dogs are attracted to your treat farms! \n \n")
+		textbox.scrollTop = textbox.scrollHeight 
 		
 		unlockBuilding("Burrows", 1, undefined, 0, 0, 5, 1.2, "Sticks")
-		let burrows = findBuilding("Burrows")
+		textbox.append("The dog has built a nearby burrow as a home. \n \n")	
+		textbox.scrollTop = textbox.scrollHeight 
+
+		//creates Total Dog count
+		let totaldogcount = document.createElement("span")
+		let totaldogcountvalue = document.createElement("span")
+		
+		totaldogcount.innerText = "Total Dogs: "
+		totaldogcount.classList.add("resourcename")
+		totaldogcount.classList.add("TotalDogs")
+
+		totaldogcountvalue.innerText = totaldogs()
+		totaldogcountvalue.classList.add("resourcevalue")
+		totaldogcountvalue.classList.add("TotalDogs")
+		totaldogcountvalue.setAttribute("type", "number")
+	
+	totaldogcount.append(totaldogcountvalue)
+	resourceList.prepend(totaldogcount)
+
 	}
 
 	//Dogs like to fetch sticks
 	if (dogs.value >= 1 && triggerSticks == false) {
 		triggerSticks = true
-		unlockResource("Sticks",0)
+		unlockResource("Sticks", 3)
 	}
 
 	//Dogs like jobs!
 	if (treatsFarm.number >= 5 && triggerDogFarmer == false) {
 		triggerDogFarmer = true
 		unlockDogJob("DogFarmer","Treats", 2)
+		textbox.append("The dogs have learned how to treats into more treats \n \n")
+		textbox.scrollTop = textbox.scrollHeight 
 	}	
 	if (burrows.number >= 1 && triggerDogFetcher == false) {
 		triggerDogFetcher = true
 		unlockDogJob("DogFetcher","Sticks", 2)
+		textbox.append("Dogs like to fetch sticks! \n \n")
+		textbox.scrollTop = textbox.scrollHeight 
+	}
+
+	//Unlocks Gaurd Dogs
+	if (totaldogs() >= 10 && triggerGaurdDog == false) {
+		triggerGaurdDog = true
+		unlockDogJob("GuardDog", undefined, 0)
+		textbox.append("The population is becoming pretty big, you might need protection \n \n")
+	}
+
+	//The cats notice your growing village and attack!
+	if (totaldogs() >= 15 && triggerCatAttack == false) {
+		triggerCatAttack = true
 	}
 }
 
