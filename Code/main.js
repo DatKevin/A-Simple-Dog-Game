@@ -226,15 +226,7 @@ let increment = function() {
 		}
 	}
 
-	//Increments through 
-	for (let i = 0; i < resourceStats.length; i++) {
-		let element = resourceStats[i]
-		let elementValue = document.querySelector(".resourcevalue" + "." + element.name)
-		element.value += element.persecond
-		elementValue.innerText = Math.round(element.value)
-	}
-	//Caps the number of dogs = to the value of the burrows
-	let burrows = findBuilding("Burrows")
+	//Calculates running total of dogs with all thier jobs
 	let calculatetotaldogs = function() {
 		let total = 0
 		for (let k = 0; k < dogjobStats.length; k++) {
@@ -243,6 +235,35 @@ let increment = function() {
 		total += dogs.value
 		return total
 	}
+
+	//Increments through 
+	for (let i = 0; i < resourceStats.length; i++) {
+		let element = resourceStats[i]
+		let elementValue = document.querySelector(".resourcevalue" + "." + element.name)
+		element.value += element.persecond
+		//Dogs eat treats! They will reduce the value of treats
+		if (element.name == "Treats") {
+			element.value -= calculatetotaldogs() * 1
+			//if there aren't enough treats, dogs will start to die
+			if (element.value < 0) {
+				element.value = 0
+				if (dogs.value > 0) {
+					dogs.value -= 1
+				}
+				else {
+					for (let j = 0; j < dogjobStats.length; j++) {
+						if (dogjobStats[j].number > 0) {
+							dogjobStats[j].number -= 1
+						}
+					}
+				}
+			}
+		}
+		elementValue.innerText = Math.round(element.value)
+	}
+
+	//Caps the number of dogs = to the value of the burrows
+	let burrows = findBuilding("Burrows")
 	if (calculatetotaldogs() >= (burrows.number * 5) && holdvalue == 0) {
 		holdvalue = dogs.persecond
 		dogs.persecond = 0
@@ -251,7 +272,6 @@ let increment = function() {
 		dogs.persecond = holdvalue
 		holdvalue = 0
 	}
-
 	let dogvalue = document.querySelector(".resourcevalue.Dogs")
 	dogvalue.innerText = dogs.value
 	console.log(resourceStats)
@@ -287,7 +307,7 @@ let unlocklist = function(name, resource, rate) {
 		
 		unlockResource("Dogs", 1)
 		let dogs = findResource("Dogs")
-		dogs.persecond += 1
+		dogs.persecond += 0.5
 		
 		unlockBuilding("Burrows", 1, undefined, 0, 0, 5, 1.2, "Sticks")
 		let burrows = findBuilding("Burrows")
