@@ -2,21 +2,47 @@ html {
 	margin: auto;
 	padding: 10px;
 }
+
+body {
+	display: grid;
+	grid-template-columns: 200px auto 200px;
+	grid-template-rows: auto;
+	gap: 20px;
+}
+
 h1 {
 	text-align: center;
+	background: grey;
+	grid-column: 1/4;
+	grid-row: 1;
 }
 
 .buildingslist {
 	text-align: center;
+	background: grey;
+	grid-column: 2/3;
+	grid-row: 2/4;
 }
 
 .resourcelist {
-	text-align: left
+	text-align: left;
+	background: grey;
+	grid-column: 1;
+	grid-row: 2;
 
+}
+
+.dogjoblist {
+	background: grey;
+	grid-column: 1;
+	grid-row: 3;
 }
 
 h3 {
 	text-align: center;
+	background: grey;
+	grid-column: 1/4;
+	grid-row: 4;
 
 }
 
@@ -41,6 +67,8 @@ h3 {
 }
 
 textarea {
-	height:200px;
-	width:200px;
+	height: auto;
+	width: auto;
+	grid-column: 3;
+	grid-row: 2/4; 	
 }
