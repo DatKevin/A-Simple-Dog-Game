@@ -66,6 +66,11 @@ h3 {
 	white-space: pre;
 }
 
+.addbutton.removebutton::before{
+	content: "\A";
+	white-space: pre;
+}
+
 textarea {
 	height: auto;
 	width: auto;

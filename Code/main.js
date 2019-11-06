@@ -15,17 +15,19 @@ let dogjobStats = []
 let holdvalue = 0
 
 //Unlockables start off as false and turn true as they become unlocked
-let triggerTreatFarm = false
-let triggerDogRate = false
-let triggerBorrows = false
-let triggerSticks = false
-let triggerDogFarmer = false
-let triggerDogFetcher = false
-let triggerGaurdDog = false
-let triggerCatAttack = false
-let triggerGold = false
-let triggerGoldDevice = false
-let triggerGameEnd = false
+let trigger = {
+	treatfarm: false,
+	dograte: false,
+	borrows: false,
+	sticks: false,
+	dogfarmer: false,
+	dogfetcher: false,
+	gaurddog: false,
+	catattack: false,
+	gold: false,
+	golddevice: false,
+	gamend: false
+}
 
 //Iterates through all buildings and updates the production value of that resource
 let updateProductionValues = function() {
@@ -218,6 +220,7 @@ let unlockDogJob = function(name,resource,rate) {
 
 	newdogjob.append(newdogjobvalue)
 	joblist.append(newdogjob)
+	joblist.append("\n")
 	joblist.append(addbutton)
 	joblist.append(removebutton)
 }
@@ -294,7 +297,7 @@ let increment = function() {
 	console.log(resourceStats)
 
 	//Triggers Cat attack on random values
-	if (triggerCatAttack == true) {
+	if (trigger.catattack == true) {
 		let randomNumber = Math.floor(Math.random() * 10) + 1
 		console.log(randomNumber)
 		//They attack at x % rate
@@ -373,14 +376,14 @@ let unlocklist = function(name, resource, rate) {
 
 
 	//Treat Farm unlocks once x Treats have been obtained
-	if (findResource("Treats").value >= 5 && triggerTreatFarm == false) {
-		triggerTreatFarm = true
+	if (findResource("Treats").value >= 5 && trigger.treatfarm == false) {
+		trigger.treatfarm = true
 		unlockBuilding("TreatsFarm", 0, "Treats", 1.25, 0, 3, 1.1, "Treats")
 	}
 
 	//Dogs start to come in and borrows are created to house the dog
-	if (findBuilding("TreatsFarm").number >= 3 && triggerDogRate == false) {
-		triggerDogRate = true
+	if (findBuilding("TreatsFarm").number >= 3 && trigger.dograte == false) {
+		trigger.dograte = true
 		
 		unlockResource("Dogs", 1)
 		let dogs = findResource("Dogs")
@@ -410,55 +413,55 @@ let unlocklist = function(name, resource, rate) {
 	}
 
 	//Dogs like to fetch sticks
-	if (findResource("Dogs").value >= 2 && triggerSticks == false) {
-		triggerSticks = true
+	if (findResource("Dogs").value >= 2 && trigger.sticks == false) {
+		trigger.sticks = true
 		unlockResource("Sticks", 3)
 	}
 
 	//Dogs like jobs!
-	if (findBuilding("TreatsFarm").number >= 5 && triggerDogFarmer == false) {
-		triggerDogFarmer = true
+	if (findBuilding("TreatsFarm").number >= 5 && trigger.dogfarmer == false) {
+		trigger.dogfarmer = true
 		unlockDogJob("DogFarmer","Treats", 2)
 		textbox.append("The dogs have learned how to treats into more treats \n \n")
 		textbox.scrollTop = textbox.scrollHeight 
 	}	
-	if (findBuilding("Burrows").number >= 1 && triggerDogFetcher == false) {
-		triggerDogFetcher = true
+	if (findBuilding("Burrows").number >= 1 && trigger.dogfetcher == false) {
+		trigger.dogfetcher = true
 		unlockDogJob("DogFetcher","Sticks", 2)
 		textbox.append("Dogs like to fetch sticks! \n \n")
 		textbox.scrollTop = textbox.scrollHeight 
 	}
 
 	//Unlocks Gaurd Dogs
-	if (totaldogs() >= 10 && triggerGaurdDog == false) {
-		triggerGaurdDog = true
+	if (totaldogs() >= 10 && trigger.gaurddog == false) {
+		trigger.gaurddog = true
 		unlockDogJob("GuardDog", undefined, 0)
 		textbox.append("The population is becoming pretty big, you might need protection \n \n")
 		textbox.scrollTop = textbox.scrollHeight
 	}
 
 	//The cats notice your growing village and attack!
-	if (totaldogs() >= 15 && triggerCatAttack == false) {
-		triggerCatAttack = true
+	if (totaldogs() >= 15 && trigger.catattack == false) {
+		trigger.catattack = true
 	}
 
-	if (totaldogs() >= 20 && triggerGold == false) {
-		triggerGold = true
+	if (totaldogs() >= 20 && trigger.gold == false) {
+		trigger.gold = true
 		unlockResource("Gold", 1)
 		unlockDogJob("Miner", "Gold", 1)
 		textbox.append("A dog has come with a gold bar?\n \n")
 		textbox.scrollTop = textbox.scrollHeight
 	}
 
-	if (findResource("Gold").value >= 10 && triggerGoldDevice == false) {
-		triggerGoldDevice = true
+	if (findResource("Gold").value >= 10 && trigger.golddevice == false) {
+		trigger.golddevice = true
 		unlockBuilding("GoldMachine", 0, undefined, 0, 0, 20, 1.1, "Gold")
 		textbox.append("A dog had brought back some blueprints of a strange device")
 		textbox.scrollTop = textbox.scrollHeight
 	}
 
-	if (findBuilding("GoldMachine").number >= 1 && triggerGameEnd == false) {
-		triggerGameEnd = true
+	if (findBuilding("GoldMachine").number >= 1 && trigger.gameend == false) {
+		trigger.gameend = true
 		alert("You won!")
 	}
 }
