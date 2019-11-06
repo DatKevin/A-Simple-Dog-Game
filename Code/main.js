@@ -2,7 +2,7 @@
 let treatsButton = document.querySelector(".gettreats")
 let buildingList = document.querySelector(".buildingslist")
 let resourceList = document.querySelector(".resourcelist")
-
+let linebreak = document.createElement("br")
 //textbox for player
 let textbox = document.querySelector(".dialogue")
 
@@ -16,17 +16,19 @@ let holdvalue = 0
 
 //Unlockables start off as false and turn true as they become unlocked
 let trigger = {
-	treatfarm: false,
-	dograte: false,
+	treatFarm: false,
+	dogRate: false,
 	borrows: false,
 	sticks: false,
-	dogfarmer: false,
-	dogfetcher: false,
-	gaurddog: false,
-	catattack: false,
+	dogFarmer: false,
+	dogFetcher: false,
+	gaurdDog: false,
+	catAttack: false,
 	gold: false,
-	golddevice: false,
-	gamend: false
+	goldDevice: false,
+	gameEnd: false,
+	stickBundler: false,
+	negativeTreats: false
 }
 
 //Iterates through all buildings and updates the production value of that resource
@@ -65,7 +67,8 @@ let findDogJob = function(name) {
 
 //Makes buildings. Rate is Addictive while multiplier is multiplicative.
 class Building {
-	constructor(name, number, resource, rate, multiplier, cost, costgrowth, costresource) {
+	constructor(name, number, resource, rate, multiplier, cost, 
+				costgrowth, costresource, cost2, costresource2, description) {
 		this.name = name;
 		this.number = number;
 		this.resource = resource;
@@ -74,6 +77,9 @@ class Building {
 		this.cost = cost
 		this.costgrowth = costgrowth
 		this.costresource = costresource
+		this.cost2 = cost2
+		this.costresource2 = costresource2
+		this.description = description
 	}
 }
 //Makes resources and allows for adding new resources and updates
@@ -104,19 +110,19 @@ class DogJobs {
 let unlockResource = function(name, value) {
 	let arrayelement = new Resource(name, value)
 	resourceStats.push(arrayelement)
-	let newresource = document.createElement("span")
-	let newresourcevalue = document.createElement("span")
-	let newresourcepersecond = document.createElement("span")
-	
+
+	let newresource = document.createElement("span")	
 	newresource.innerText = name + ": "
 	newresource.classList.add("resourcename")
 	newresource.classList.add(name)
 	
+	let newresourcevalue = document.createElement("span")
 	newresourcevalue.innerText = value
 	newresourcevalue.classList.add("resourcevalue")
 	newresourcevalue.classList.add(name)
 	newresourcevalue.setAttribute("type", "number")
 
+	let newresourcepersecond = document.createElement("span")
 	newresourcepersecond.innerText = 0
 	newresourcepersecond.classList.add("resourcepersecond")
 	newresourcepersecond.classList.add(name)
@@ -128,11 +134,43 @@ let unlockResource = function(name, value) {
 	newresource.append("/second")
 	resourceList.append(newresource)
 }
+
 //Dynamically adds new buildings and gives them functionality
-let unlockBuilding = function(name, number, resource, rate, multiplier, cost, costgrowth, costresource) {
+let unlockBuilding = function(name, number, resource, rate, multiplier, 
+	cost, costgrowth, costresource, cost2, costresource2, description) {
+
+	//creates the new building and dynamically adds it to the list
+	let arrayelement = new Building(name, number, resource, rate, multiplier, 
+		cost, costgrowth, costresource, cost2, costresource2, description)
+	buildingStats.push(arrayelement)
+	
+	let newbuilding = document.createElement("span")
+	newbuilding.innerText = name
+	newbuilding.classList.add("buildingname")
+
+	let buildingnumber = document.createElement("span")
+	buildingnumber.innerText = " Number: " + number
+	buildingnumber.classList.add("buildingnumber")
+	newbuilding.classList.add(name)
+	buildingnumber.setAttribute("type", "number")
+
+	let buildingcost = document.createElement("span")
+	buildingcost.innerText = " Cost: " + cost + " " + costresource 
+	buildingcost.classList.add("buildingcost")
+	newbuilding.classList.add(name)
+	buildingcost.setAttribute("type", "number")
+
+	let buildingcost2 = document.createElement("span")
+	if (costresource2 != null) {
+		buildingcost2.innerText = " " + cost2 + " " + costresource 
+		buildingcost2.classList.add("buildingcost2")
+		newbuilding.classList.add(name)
+		buildingcost2.setAttribute("type", "number")
+	}
+
+	//Checks if the cost for the building is available and reduces resources accordingly
 	let addnew = function() {
 		let resource = findResource(arrayelement.costresource)
-		//Checks if the cost for the building is available and reduces resources accordingly
 		if (resource.value >= arrayelement.cost) {	
 			arrayelement.number += 1
 			resource.value -= arrayelement.cost
@@ -140,36 +178,49 @@ let unlockBuilding = function(name, number, resource, rate, multiplier, cost, co
 			resourceValueText.innerText = Math.floor(resource.value)
 			arrayelement.cost *= arrayelement.costgrowth
 
-			buildingnumber.innerText = " Number: " + Math.floor(arrayelement.number)
-			buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost) + " " + arrayelement.costresource
-
+			//checks for a second cost resource
+			if (arrayelement.costresource2 != null) {
+				let resource2 = findResource(arrayelement.costresource2)
+				let resource2ValueText = document.querySelector(".resourcevalue." + resource2.name)
+				resource2.value -= arrayelement.cost2
+				resource2ValueText.innerText = Math.floor(resource2.value)
+				arrayelement.cost2 *= arrayelement.costgrowth
+				buildingnumber.innerText = " Number: " + arrayelement.number
+				buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost) + " "
+				 	+ arrayelement.costresource + " and " + Math.floor(arrayelement.cost2) 
+					+ costresource2
+			}
+			else {
+				buildingnumber.innerText = " Number: " + arrayelement.number
+				buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost)
+				+ " " + arrayelement.costresource
+			}
+			
 			updateProductionValues()
 			console.log(arrayelement.number)
 		}
 		console.log("Button works")
 	}
-	//creates the new building and dynamically adds it to the list
-	let arrayelement = new Building(name, number, resource, rate, multiplier, cost, costgrowth, costresource)
-	buildingStats.push(arrayelement)
-	
-	let newbuilding = document.createElement("span")
-	newbuilding.innerText = name
-	newbuilding.addEventListener("click", addnew)
-	newbuilding.classList.add("buildingname")
-	newbuilding.classList.add(name)
 
-	let buildingnumber = document.createElement("span")
-	buildingnumber.innerText = " Number: " + number
-	buildingnumber.classList.add("buildingnumber")
-	buildingnumber.setAttribute("type", "number")
+	let addbutton = document.createElement("button")
+	addbutton.addEventListener("click", addnew)
+	addbutton.classList.add("addbutton")
+	addbutton.classList.add("buildingbutton")
+	addbutton.setAttribute("type", "button")
+	addbutton.innerText = "Add Building"
 
-	let buildingcost = document.createElement("span")
-	buildingcost.innerText = " Cost: " + cost + " " + costresource 
-	buildingcost.classList.add("buildingcost")
-	buildingcost.setAttribute("type", "number")
+	let buildingdescription = document.createElement("span")
+	buildingdescription.innerText = description
+	buildingdescription.classList.add("buildingdescription")
+	buildingdescription.classList.add(name)
 
 	newbuilding.append(buildingnumber)
+	newbuilding.append(addbutton)
 	newbuilding.append(buildingcost)
+	if (costresource2 != null) {
+		newbuilding.append(buildingcost2)
+	}
+	newbuilding.append(buildingdescription)
 	buildingList.append(newbuilding)
 }
 
@@ -200,30 +251,32 @@ let unlockDogJob = function(name,resource,rate) {
 	}
 
 	//Dynamically adds new dog jobs to the list
+	let joblist = document.querySelector(".dogjoblist")
 	let arrayelement = new DogJobs(name, resource, rate)
 	dogjobStats.push(arrayelement)
-	let newdogjob = document.createElement("span")
-	let newdogjobvalue = document.createElement("span")
-	let addbutton = document.createElement("button")
-	let removebutton = document.createElement("button")
-	let joblist = document.querySelector(".dogjoblist")
 
+	let newdogjob = document.createElement("span")
 	newdogjob.innerText = name + "Number: "
 	newdogjob.classList.add("dogjobname")
 	newdogjob.classList.add(name)
 
+	let newdogjobvalue = document.createElement("span")
 	newdogjobvalue.setAttribute("type", "number")
 	newdogjobvalue.innerText = arrayelement.number
 	newdogjobvalue.classList.add("dogjobvalue")
 	newdogjobvalue.classList.add(name)
 
+	let addbutton = document.createElement("button")
 	addbutton.addEventListener("click", addDog)
 	addbutton.classList.add("addbutton")
+	addbutton.classList.add("dogjobbutton")
 	addbutton.setAttribute("type", "button")
 	addbutton.innerText = "Add Dog"
 
+	let removebutton = document.createElement("button")
 	removebutton.addEventListener("click", removeDog)
 	removebutton.classList.add("removebutton")
+	removebutton.classList.add("dogjobbutton")
 	removebutton.setAttribute("type", "button")	
 	removebutton.innerText = "Remove Dog"
 
@@ -249,6 +302,7 @@ let totaldogs = function() {
 let increment = function() {
 	let dogs = findResource("Dogs")
 
+
 	//Increments through all resources and increases them appropriately
 	for (let i = 0; i < resourceStats.length; i++) {
 		let element = resourceStats[i]
@@ -266,14 +320,10 @@ let increment = function() {
 			return increase	
 		}
 
-
-		element.value += element.persecond + dogincrease()
-		console.log (element.name + dogincrease())
-
-
 		//Dogs eat treats! They will reduce the value of treats
 		if (element.name == "Treats" && dogs != undefined) {
-			element.value -= totaldogs() * 1
+			let dognoms = totaldogs() * 1
+			element.value += element.persecond + dogincrease() - dognoms		
 			//if there aren't enough treats, dogs will start to die
 			if (element.value < 0) {
 				element.value = 0
@@ -281,7 +331,6 @@ let increment = function() {
 					dogs.value -= 1
 					let dogtextvalue = document.querySelector(".resourcevalue.Dogs")
 					dogtextvalue.innerText = dogs.value
-					textbox.append("A dog has died of starvation :c \n \n")	
 				}
 				else {
 					for (let j = 0; j < dogjobStats.length; j++) {
@@ -289,16 +338,33 @@ let increment = function() {
 							dogjobStats[j].number -= 1								
 							let specialdogtextvalue = document.querySelector(".dogjobvalue." + dogjobStats[j].name)
 							specialdogtextvalue.innerText = dogjobStats[j].number
-							textbox.append("A dog has died of starvation :c \n \n")
 						}
 					}	
 				}
+			} 	
+			elementValue.innerText = Math.floor(element.value)
+			elementPerSecond.innerText = element.persecond + dogincrease() - dognoms
+			
+			//alerts player of negative treats
+			if (elementPerSecond.innerText < 0 && trigger.negativeTreats == false) {
+				trigger.negativeTreats = true
+				textbox.append("Oh no, the dogs are eating more treats than they produce!")
+				textbox.append("Dogs will start to die if there aren't enough treats \n \n")
+			}
+			else if (elementPerSecond.innerText > 0 && trigger.negativeTreats == true) {
+				trigger.negativeTreats = false
+				textbox.append("Dogs celebrate as there is enough for all to eat! \n \n")
 			}
 		}
+
 		//updates the value of the resource on the page
-		elementValue.innerText = Math.floor(element.value)
-		elementPerSecond.innerText = element.persecond + dogincrease()
+		else{
+			element.value += element.persecond + dogincrease()
+			elementValue.innerText = Math.floor(element.value)
+			elementPerSecond.innerText = element.persecond + dogincrease()
+		}
 	}
+
 
 	//Caps the number of dogs = to the value of the burrows
 	let burrows = findBuilding("Burrows")
@@ -314,8 +380,12 @@ let increment = function() {
 	dogvalue.innerText = Math.floor(dogs.value)
 	console.log(resourceStats)
 
+
+
+
+
 	//Triggers Cat attack on random values
-	if (trigger.catattack == true) {
+	if (trigger.catAttack == true) {
 		let randomNumber = Math.floor(Math.random() * 10) + 1
 		console.log(randomNumber)
 		//They attack at x % rate
@@ -381,27 +451,19 @@ let increment = function() {
 	textbox.scrollTop = textbox.scrollHeight 
 }
 
-//Add Treat Button
-let addTreat = function() {	
-	let treats = findResource("Treats")
-	treats.value += 1
-	let valueText = document.querySelector(".resourcevalue.Treats")
-	valueText.innerText = Math.floor(treats.value)	
-}
-
 //List of unlockables that dynamically adds them
 let unlocklist = function(name, resource, rate) {
 
-
 	//Treat Farm unlocks once x Treats have been obtained
-	if (findResource("Treats").value >= 5 && trigger.treatfarm == false) {
-		trigger.treatfarm = true
-		unlockBuilding("TreatsFarm", 0, "Treats", 1.25, 0, 3, 1.1, "Treats")
+	if (findResource("Treats").value >= 5 && trigger.treatFarm == false) {
+		trigger.treatFarm = true
+		unlockBuilding("TreatsFarm", 0, "Treats", 1.25, 0, 3, 1.1, "Treats", 0, null, 
+			"A quaint farm to grow more dog treats")
 	}
 
 	//Dogs start to come in and borrows are created to house the dog
-	if (findBuilding("TreatsFarm").number >= 3 && trigger.dograte == false) {
-		trigger.dograte = true
+	if (findBuilding("TreatsFarm").number >= 3 && trigger.dogRate == false) {
+		trigger.dogRate = true
 		
 		unlockResource("Dogs", 1)
 		let dogs = findResource("Dogs")
@@ -409,7 +471,8 @@ let unlocklist = function(name, resource, rate) {
 		textbox.append("The dogs are attracted to your treat farms! \n \n")
 		textbox.scrollTop = textbox.scrollHeight 
 		
-		unlockBuilding("Burrows", 1, undefined, 0, 0, 5, 1.2, "Sticks")
+		unlockBuilding("Burrows", 1, undefined, 0, 0, 5, 1.2, "Sticks", 0, null, 
+			"A cheap and easy home made by digging a hole and putting some sticks in it")
 		textbox.append("The dog has built a nearby burrow as a home. \n \n")	
 		textbox.scrollTop = textbox.scrollHeight 
 
@@ -437,30 +500,30 @@ let unlocklist = function(name, resource, rate) {
 	}
 
 	//Dogs like jobs!
-	if (findBuilding("TreatsFarm").number >= 5 && trigger.dogfarmer == false) {
-		trigger.dogfarmer = true
+	if (findBuilding("TreatsFarm").number >= 5 && trigger.dogFarmer == false) {
+		trigger.dogFarmer = true
 		unlockDogJob("DogFarmer","Treats", 2)
 		textbox.append("The dogs have learned how to treats into more treats \n \n")
 		textbox.scrollTop = textbox.scrollHeight 
 	}	
-	if (findBuilding("Burrows").number >= 1 && trigger.dogfetcher == false) {
-		trigger.dogfetcher = true
+	if (findBuilding("Burrows").number >= 1 && trigger.dogFetcher == false) {
+		trigger.dogFetcher = true
 		unlockDogJob("DogFetcher","Sticks", 2)
 		textbox.append("Dogs like to fetch sticks! \n \n")
 		textbox.scrollTop = textbox.scrollHeight 
 	}
 
 	//Unlocks Gaurd Dogs
-	if (totaldogs() >= 10 && trigger.gaurddog == false) {
-		trigger.gaurddog = true
+	if (totaldogs() >= 10 && trigger.gaurdDog == false) {
+		trigger.gaurdDog = true
 		unlockDogJob("GuardDog", undefined, 0)
 		textbox.append("The population is becoming pretty big, you might need protection \n \n")
 		textbox.scrollTop = textbox.scrollHeight
 	}
 
 	//The cats notice your growing village and attack!
-	if (totaldogs() >= 15 && trigger.catattack == false) {
-		trigger.catattack = true
+	if (totaldogs() >= 15 && trigger.catAttack == false) {
+		trigger.catAttack = true
 	}
 
 	if (totaldogs() >= 20 && trigger.gold == false) {
@@ -471,21 +534,32 @@ let unlocklist = function(name, resource, rate) {
 		textbox.scrollTop = textbox.scrollHeight
 	}
 
-	if (findResource("Gold").value >= 10 && trigger.golddevice == false) {
-		trigger.golddevice = true
-		unlockBuilding("GoldMachine", 0, undefined, 0, 0, 20, 1.1, "Gold")
+	if (findResource("Gold").value >= 10 && trigger.goldDevice == false) {
+		trigger.goldDevice = true
+		unlockBuilding("GoldDevice", 0, undefined, 0, 0, 20, 1.1, "Gold", 20, "Treats",
+			"A mysterious and intricate machine. Who knows what it does?")
 		textbox.append("A dog had brought back some blueprints of a strange device")
 		textbox.scrollTop = textbox.scrollHeight
 	}
 
-	if (findBuilding("GoldMachine").number >= 1 && trigger.gameend == false) {
-		trigger.gameend = true
+	if (findBuilding("GoldDevice").number >= 1 && trigger.gameEnd == false) {
+		trigger.gameEnd = true
 		alert("You won!")
+	}
+
+	if (findResource("Sticks").number >= 20 && trigger.stickBundler == false) {
+		trigger.stickBundler = true
 	}
 }
 
 
 //Unlocks default resources and button
+let addTreat = function() {	
+	let treats = findResource("Treats")
+	treats.value += 1
+	let valueText = document.querySelector(".resourcevalue.Treats")
+	valueText.innerText = Math.floor(treats.value)	
+}
 unlockResource("Treats", 0)
 treatsButton.addEventListener("click",addTreat)
 
