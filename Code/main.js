@@ -106,6 +106,7 @@ let unlockResource = function(name, value) {
 	resourceStats.push(arrayelement)
 	let newresource = document.createElement("span")
 	let newresourcevalue = document.createElement("span")
+	let newresourcepersecond = document.createElement("span")
 	
 	newresource.innerText = name + ": "
 	newresource.classList.add("resourcename")
@@ -115,8 +116,16 @@ let unlockResource = function(name, value) {
 	newresourcevalue.classList.add("resourcevalue")
 	newresourcevalue.classList.add(name)
 	newresourcevalue.setAttribute("type", "number")
-	
+
+	newresourcepersecond.innerText = 0
+	newresourcepersecond.classList.add("resourcepersecond")
+	newresourcepersecond.classList.add(name)
+	newresourcepersecond.setAttribute("type","number")
+
 	newresource.append(newresourcevalue)
+	newresource.append("       \n")
+	newresource.append(newresourcepersecond)
+	newresource.append("/second")
 	resourceList.append(newresource)
 }
 //Dynamically adds new buildings and gives them functionality
@@ -240,20 +249,27 @@ let totaldogs = function() {
 let increment = function() {
 	let dogs = findResource("Dogs")
 
-	//Grabs resources for Dog Jobs
-	for (let i = 0; i < resourceStats.length; i++) {
-		for (let j = 0; j < dogjobStats.length; j++) {
-			if (dogjobStats[j].resource == resourceStats[i].name) {
-				resourceStats[i].value += dogjobStats[j].rate * dogjobStats[j].number
-			}
-		}
-	}
-
-	//Increments through 
+	//Increments through all resources and increases them appropriately
 	for (let i = 0; i < resourceStats.length; i++) {
 		let element = resourceStats[i]
-		let elementValue = document.querySelector(".resourcevalue" + "." + element.name)
-		element.value += element.persecond
+		let elementValue = document.querySelector(".resourcevalue." + element.name)
+		let elementPerSecond = document.querySelector(".resourcepersecond." + element.name)
+		
+		//Increases resources based on what jobs dogs are working
+		let dogincrease = function () {
+			let increase = 0
+			for (let k = 0; k < dogjobStats.length; k++) {
+				if (dogjobStats[k].resource == element.name) {
+					increase += dogjobStats[k].rate * dogjobStats[k].number
+				}			
+			}
+			return increase	
+		}
+
+
+		element.value += element.persecond + dogincrease()
+		console.log (element.name + dogincrease())
+
 
 		//Dogs eat treats! They will reduce the value of treats
 		if (element.name == "Treats" && dogs != undefined) {
@@ -279,7 +295,9 @@ let increment = function() {
 				}
 			}
 		}
+		//updates the value of the resource on the page
 		elementValue.innerText = Math.floor(element.value)
+		elementPerSecond.innerText = element.persecond + dogincrease()
 	}
 
 	//Caps the number of dogs = to the value of the burrows
