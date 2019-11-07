@@ -27,17 +27,20 @@ let trigger = {
 	goldDevice: false,
 	gameEnd: false,
 	stickBundler: false,
-	negativeTreats: false
+	negativeTreats: false,
+	dogHouse:false
 }
 
 //Iterates through all buildings and updates the production value of that resource
 let updateProductionValues = function() {
 	for(let i = 0; i<buildingStats.length; i++) {
 		let resource = findResource(buildingStats[i].resource)
-		resource.base = (buildingStats[i].rate * buildingStats[i].number)
-		resource.multiplier = (buildingStats[i].multiplier * buildingStats[i].number)
-		resource.updateResource()
-		console.log(buildingStats)
+		if (resource != undefined) {
+			resource.base = (buildingStats[i].rate * buildingStats[i].number)
+			resource.multiplier = (buildingStats[i].multiplier * buildingStats[i].number)
+			resource.updateResource()
+			console.log(buildingStats)
+		}
 	}	
 }
 //Instntly pulls resource/building/dog job stats from array
@@ -401,15 +404,21 @@ let increment = function() {
 	}
 
 
-	//Caps the number of dogs = to the value of the burrows
+	//Caps the number of dogs = to the value of the burrows and dog houses
 	let burrows = findBuilding("Burrows")
-	if (totaldogs() >= (burrows.number * 5) && holdvalue == 0) {
+	let doghouse = findBuilding("DogHouse")
+	if (doghouse == undefined) {
+		doghouse = {number:0}
+	}
+	if (totaldogs() >= ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue == 0) {
 		holdvalue = dogs.persecond
 		dogs.persecond = 0
+		console.log("Stopped")
 	}
-	if (totaldogs() < burrows.number * 5 && holdvalue != 0) {
+	if (totaldogs() < ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue != 0) {
 		dogs.persecond = holdvalue
 		holdvalue = 0
+		console.log("Continue")
 	}
 	let dogvalue = document.querySelector(".resourcevalue.Dogs")
 	dogvalue.innerText = Math.floor(dogs.value)
@@ -507,7 +516,7 @@ let unlocklist = function(name, resource, rate) {
 		textbox.scrollTop = textbox.scrollHeight 
 		
 		unlockBuilding("Burrows", 1, null, 0, 0, 5, 1.2, "Sticks", 0, null, 
-			"A cheap and easy home made by digging a hole and putting some sticks in it")
+			"A cheap and easy home made by digging a hole and putting some sticks in it. Can hold 5 dogs each")
 		textbox.append("The dog has built a nearby burrow as a home. \n \n")	
 		textbox.scrollTop = textbox.scrollHeight 
 
@@ -582,8 +591,17 @@ let unlocklist = function(name, resource, rate) {
 		alert("You won!")
 	}
 
-	if (findResource("Sticks").number >= 20 && trigger.stickBundler == false) {
+	if (findResource("Sticks").value >= 20 && trigger.stickBundler == false) {
 		trigger.stickBundler = true
+		unlockResource("Logs", 0)
+		unlockBuilding("StickBundler", 0, "Logs", 1, 0, 10, 1.25, "Sticks", 0, null,
+			"Turns big unusable sticks to bigger but usuable sticks")
+	}
+
+	if (findResource("Logs").value >= 20 && trigger.dogHouse == false) {
+		trigger.dogHouse = true
+		unlockBuilding("DogHouse", 0, null, 0, 0, 15, 1.5, "Logs", 50, "Treats",
+			"A home made for a very good dog, or at least 10 of them")
 	}
 }
 
