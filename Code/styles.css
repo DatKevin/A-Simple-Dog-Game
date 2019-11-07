@@ -8,7 +8,7 @@ body {
 	display: grid;
 	grid-template-columns: 300px auto 300px;
 	grid-template-rows: auto;
-	gap: 30px;
+	gap: 40px;
 	background: lightgray
 }
 
@@ -19,11 +19,21 @@ h1 {
 	grid-row: 1;
 }
 
-.buildingslist {
-	text-align: center;
-	background: grey;
+
+textarea {
+	height: auto;
+	width: auto;
+	grid-column: 3;
+	grid-row: 2/4; 	
+}
+
+.buildingslist:not(button) {
 	grid-column: 2/3;
 	grid-row: 2/4;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-template-rows: auto;
+	gap: 20px;
 }
 
 .resourcelist {
@@ -48,9 +58,35 @@ h2 {
 
 }
 
-.listtitle {
-	font-size: 1.1em;
+.buildinglist:first-child {	
+	text-align: center;
 }
+
+
+.buildingbutton {
+	float: right;
+}
+.buildingcost {
+	float: left
+}
+.buildingdescription::after {
+	content: "\A \A";
+	white-space: pre;
+}
+.buildingdescription::before {
+	content: "\A";
+	white-space: pre;
+}
+
+.buildingname {
+	display: flex;
+	justify-content: space-between;
+}
+
+
+
+
+
 .resourcename::after {
 	content: "\A";
 	white-space: pre;
@@ -65,34 +101,21 @@ h2 {
 	padding-left: 10px;
 }
 
-.buildingname::before {
-	content: "\A \A";
-	white-space: pre;
-}
 
-.buildingname::after {
-	content: "\A";
-	white-space: pre;
-}
 
-.buildingname {
-	font-size: 1.1em;
-}
 
-.buildingdescription::before{
-	content: "\A";
-	white-space: pre;
-}
+
+
+
+
+
+
 
 .dogjobvalue::after {
 	content: "\A";
 	white-space: pre;
 }
 
-.buildingratepersecond::before{
-	content: "\A";
-	white-space: pre;
-}
 
 .dogjobname:not(:first-child)::before {
 	content: "\A";
@@ -103,13 +126,4 @@ h2 {
 	content: "\A";
 	white-space: pre;
 
-}
-
-
-
-textarea {
-	height: auto;
-	width: auto;
-	grid-column: 3;
-	grid-row: 2/4; 	
 }

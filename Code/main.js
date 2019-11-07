@@ -139,7 +139,7 @@ let unlockResource = function(name, value) {
 
 	newresource.append(newresourcevalue)
 	newresource.append(newresourcepersecond)
-	newresource.append("/second")
+	newresource.append(" /s")
 	resourceList.append(newresource)
 }
 
@@ -155,31 +155,36 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 	let newbuilding = document.createElement("span")
 	newbuilding.classList.add("buildingitem")
 	newbuilding.classList.add(name)
+	newbuilding.classList.add("card")
 
+	let buildingbody = document.createElement("span")
+	buildingbody.classList.add("buildingbody")
+	buildingbody.classList.add(name)
+	buildingbody.classList.add("card-body")
 
-	let buildingname = document.createElement("span")
+	let buildingname = document.createElement("h5")
 	buildingname.innerText = name
 	buildingname.classList.add("buildingname")
 	buildingname.classList.add(name)
-
-
+	buildingname.classList.add("card-title")
 
 	let buildingnumber = document.createElement("span")
-	buildingnumber.innerText = " Number: " + number
+	buildingnumber.innerText = "x" + number
 	buildingnumber.classList.add("buildingnumber")
-	newbuilding.classList.add(name)
+	buildingnumber.classList.add(name)
 	buildingnumber.setAttribute("type", "number")
+	buildingnumber.classList.add("card-text")
 
 	let buildingcost = document.createElement("span")
 	buildingcost.innerText = " Cost: " + cost + " " + costresource 
 	buildingcost.classList.add("buildingcost")
-	newbuilding.classList.add(name)
+	buildingcost.classList.add(name)
 	buildingcost.setAttribute("type", "number")
 
 	let buildingcost2 = document.createElement("span")
 	if (costresource2 != null || costresource2 != undefined) {
 		buildingcost2.classList.add("buildingcost2")
-		newbuilding.classList.add(name)
+		buildingcost2.classList.add(name)
 		buildingcost2.setAttribute("type", "number")
 		buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost)
 			+ " " + arrayelement.costresource + " and " 
@@ -203,13 +208,13 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 				resource2.value -= arrayelement.cost2
 				resource2ValueText.innerText = Math.floor(resource2.value)
 				arrayelement.cost2 *= arrayelement.costgrowth
-				buildingnumber.innerText = " Number: " + arrayelement.number
+				buildingnumber.innerText = "x" + arrayelement.number
 				buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost) + " "
 				 	+ arrayelement.costresource2 + " and " + Math.floor(arrayelement.cost2) 
 					+ costresource2
 			}
 			else {
-				buildingnumber.innerText = " Number: " + arrayelement.number
+				buildingnumber.innerText = "x" + arrayelement.number
 				buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost)
 				+ " " + arrayelement.costresource
 			}
@@ -232,9 +237,10 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 	addbutton.setAttribute("type", "button")
 	addbutton.innerText = "Add Building"
 
-	let buildingdescription = document.createElement("span")
+	let buildingdescription = document.createElement("h6")
 	buildingdescription.innerText = description
 	buildingdescription.classList.add("buildingdescription")
+	buildingdescription.classList.add("card-subtitle")
 	buildingdescription.classList.add(name)
 
 	//checks if the building actually produces anything
@@ -246,19 +252,20 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 		buildingratepersecond.setAttribute("type","number")
 	}
 
-	newbuilding.append(buildingname)
-	newbuilding.append(addbutton)
-	newbuilding.append(buildingnumber)
-	newbuilding.append(buildingcost)
-	if (costresource2 != null || costresource2 != undefined) {
-		newbuilding.append(buildingcost2)
-	}
-	newbuilding.append(buildingdescription)
+	buildingbody.append(buildingname)
+	buildingname.append(buildingnumber)
 	if (resource != null) {
-		newbuilding.append(buildingratepersecond)
-		newbuilding.append(" " + resource)
-		newbuilding.append("/second")
+		buildingbody.append(buildingratepersecond)
+		buildingbody.append(" " + resource)
+		buildingbody.append(" /s")
 	}
+	buildingbody.append(buildingdescription)
+		buildingbody.append(buildingcost)
+	if (costresource2 != null || costresource2 != undefined) {
+		buildingbody.append(buildingcost2)
+	}
+	newbuilding.append(buildingbody)
+	buildingbody.append(addbutton)
 	buildingList.append(newbuilding)
 }
 
@@ -299,7 +306,7 @@ let unlockDogJob = function(name,resource,rate) {
 	dogjobStats.push(arrayelement)
 
 	let newdogjob = document.createElement("span")
-	newdogjob.innerText = name + "   Number: "
+	newdogjob.innerText = name + "  x"
 	newdogjob.classList.add("dogjobname")
 	newdogjob.classList.add(name)
 
@@ -339,7 +346,7 @@ let unlockDogJob = function(name,resource,rate) {
 	newdogjob.append(newdogjobvalue)
 	if (resource != null) {
 		newdogjob.append(dogratepersecond)
-		newdogjob.append(" " + resource + "/second")
+		newdogjob.append(" " + resource + " /s")
 	}
 	joblist.append(newdogjob)
 	joblist.append(addbutton)
@@ -483,7 +490,7 @@ let increment = function() {
 					if (guard.number > 0) {
 						guard.number -= 1
 						totaldeaths += 1
-						let guardvalue = document.querySelector(".dogjobvalue" + guard.name)
+						let guardvalue = document.querySelector(".dogjobvalue.GuardDog")
 						guardvalue.innerText = guard.number
 					}
 					else if (dogs.value > 0) {
@@ -673,13 +680,13 @@ let unlocklist = function(name, resource, rate) {
 			textbox.scrollTop = textbox.scrollHeight
 		} 
 		if (findBuilding("GoldMonument").number >= 3 && trigger.thirdmessage == false) {
-			trigger.firstmessage = true
+			trigger.thirdmessage = true
 			textbox.append("\n \n")
 			textbox.append("Life of the trees nearby are starting to wilt. Dogs are falling ill and a rumor of the 'best dog' starts to spread")
 			textbox.scrollTop = textbox.scrollHeight
 		} 
 		if (findBuilding("GoldMonument").number >= 4 && trigger.forthmessage == false) {
-			trigger.firstmessage = true
+			trigger.forthmessage = true
 			textbox.append("\n \n")
 			textbox.append("At the moment of the monument's completion, an eerie silence overtakes all of dogs. In unison they all quietly mutter 'The best dog cometh'")
 			textbox.scrollTop = textbox.scrollHeight
