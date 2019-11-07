@@ -2,7 +2,6 @@
 let treatsButton = document.querySelector(".gettreats")
 let buildingList = document.querySelector(".buildingslist")
 let resourceList = document.querySelector(".resourcelist")
-let linebreak = document.createElement("br")
 //textbox for player
 let textbox = document.querySelector(".dialogue")
 
@@ -129,7 +128,6 @@ let unlockResource = function(name, value) {
 	newresourcepersecond.setAttribute("type","number")
 
 	newresource.append(newresourcevalue)
-	newresource.append("       \n")
 	newresource.append(newresourcepersecond)
 	newresource.append("/second")
 	resourceList.append(newresource)
@@ -162,10 +160,12 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 
 	let buildingcost2 = document.createElement("span")
 	if (costresource2 != null) {
-		buildingcost2.innerText = " " + cost2 + " " + costresource 
 		buildingcost2.classList.add("buildingcost2")
 		newbuilding.classList.add(name)
 		buildingcost2.setAttribute("type", "number")
+		buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost)
+			+ " " + arrayelement.costresource + " and " 
+			+ Math.floor(arrayelement.cost2) + " " + costresource2
 	}
 
 	//Checks if the cost for the building is available and reduces resources accordingly
@@ -187,7 +187,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 				arrayelement.cost2 *= arrayelement.costgrowth
 				buildingnumber.innerText = " Number: " + arrayelement.number
 				buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost) + " "
-				 	+ arrayelement.costresource + " and " + Math.floor(arrayelement.cost2) 
+				 	+ arrayelement.costresource2 + " and " + Math.floor(arrayelement.cost2) 
 					+ costresource2
 			}
 			else {
@@ -195,7 +195,10 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 				buildingcost.innerText = " Cost: " + Math.floor(arrayelement.cost)
 				+ " " + arrayelement.costresource
 			}
-			
+
+			if (resource != null) {
+				buildingratepersecond.innerText = arrayelement.number * arrayelement.rate
+			}
 			updateProductionValues()
 			console.log(arrayelement.number)
 		}
@@ -214,13 +217,28 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 	buildingdescription.classList.add("buildingdescription")
 	buildingdescription.classList.add(name)
 
-	newbuilding.append(buildingnumber)
+	//checks if the building actually produces anything
+	let buildingratepersecond = document.createElement("span")
+	if (resource != null) {
+		buildingratepersecond.innerText = rate
+		buildingratepersecond.classList.add("buildingratepersecond")
+		buildingratepersecond.classList.add(name)
+		buildingratepersecond.setAttribute("type","number")
+	}
+
+
 	newbuilding.append(addbutton)
+	newbuilding.append(buildingnumber)
 	newbuilding.append(buildingcost)
 	if (costresource2 != null) {
 		newbuilding.append(buildingcost2)
 	}
 	newbuilding.append(buildingdescription)
+	if (resource != null) {
+		newbuilding.append(buildingratepersecond)
+		newbuilding.append(" " + resource)
+		newbuilding.append("/second")
+	}
 	buildingList.append(newbuilding)
 }
 
@@ -236,6 +254,9 @@ let unlockDogJob = function(name,resource,rate) {
 			let valueText = document.querySelector(".resourcevalue.Dogs")
 			valueText.innerText = Math.floor(dogs.value)
 			newdogjobvalue.innerText = arrayelement.number
+			if (arrayelement.resource != null) {
+				dogratepersecond.innerText = arrayelement.number * arrayelement.rate
+			}
 		}
 	}
 
@@ -247,16 +268,18 @@ let unlockDogJob = function(name,resource,rate) {
 			let valueText = document.querySelector(".resourcevalue.Dogs")
 			valueText.innerText = Math.floor(dogs.value)
 			newdogjobvalue.innerText = arrayelement.number
+			if (arrayelement.resource != null) {
+				dogratepersecond.innerText = arrayelement.number * arrayelement.rate
+			}
 		}
 	}
 
-	//Dynamically adds new dog jobs to the list
 	let joblist = document.querySelector(".dogjoblist")
 	let arrayelement = new DogJobs(name, resource, rate)
 	dogjobStats.push(arrayelement)
 
 	let newdogjob = document.createElement("span")
-	newdogjob.innerText = name + "Number: "
+	newdogjob.innerText = name + "   Number: "
 	newdogjob.classList.add("dogjobname")
 	newdogjob.classList.add(name)
 
@@ -280,9 +303,21 @@ let unlockDogJob = function(name,resource,rate) {
 	removebutton.setAttribute("type", "button")	
 	removebutton.innerText = "Remove Dog"
 
+	//Checks if the dog actually produces anything
+	let dogratepersecond = document.createElement("span")
+	if (resource != null) {
+		dogratepersecond.innerText = rate
+		dogratepersecond.classList.add("dogratepersecond")
+		dogratepersecond.classList.add(name)
+		dogratepersecond.setAttribute("type","number")
+	}
+
 	newdogjob.append(newdogjobvalue)
+	if (resource != null) {
+		newdogjob.append(dogratepersecond)
+		newdogjob.append(" " + resource + "/second")
+	}
 	joblist.append(newdogjob)
-	joblist.append("\n")
 	joblist.append(addbutton)
 	joblist.append(removebutton)
 }
@@ -471,7 +506,7 @@ let unlocklist = function(name, resource, rate) {
 		textbox.append("The dogs are attracted to your treat farms! \n \n")
 		textbox.scrollTop = textbox.scrollHeight 
 		
-		unlockBuilding("Burrows", 1, undefined, 0, 0, 5, 1.2, "Sticks", 0, null, 
+		unlockBuilding("Burrows", 1, null, 0, 0, 5, 1.2, "Sticks", 0, null, 
 			"A cheap and easy home made by digging a hole and putting some sticks in it")
 		textbox.append("The dog has built a nearby burrow as a home. \n \n")	
 		textbox.scrollTop = textbox.scrollHeight 
@@ -516,7 +551,7 @@ let unlocklist = function(name, resource, rate) {
 	//Unlocks Gaurd Dogs
 	if (totaldogs() >= 10 && trigger.gaurdDog == false) {
 		trigger.gaurdDog = true
-		unlockDogJob("GuardDog", undefined, 0)
+		unlockDogJob("GuardDog", null, 0)
 		textbox.append("The population is becoming pretty big, you might need protection \n \n")
 		textbox.scrollTop = textbox.scrollHeight
 	}
@@ -536,7 +571,7 @@ let unlocklist = function(name, resource, rate) {
 
 	if (findResource("Gold").value >= 10 && trigger.goldDevice == false) {
 		trigger.goldDevice = true
-		unlockBuilding("GoldDevice", 0, undefined, 0, 0, 20, 1.1, "Gold", 20, "Treats",
+		unlockBuilding("GoldDevice", 0, null, 0, 0, 20, 1.1, "Gold", 30, "Treats",
 			"A mysterious and intricate machine. Who knows what it does?")
 		textbox.append("A dog had brought back some blueprints of a strange device")
 		textbox.scrollTop = textbox.scrollHeight
@@ -571,4 +606,3 @@ let incrementalchecker = function() {
 
 //Starts the game
 incrementalchecker()
-

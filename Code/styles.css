@@ -56,20 +56,36 @@ h3 {
 	white-space: pre;
 }
 
+.resourcevalue::after {
+	content: "\a";
+	white-space: pre;
+}
+
+.buildingdescription::before{
+	content: "\A";
+	white-space: pre;
+}
+
+.dogjobvalue::after {
+	content: "\A";
+	white-space: pre;
+}
+
+.buildingratepersecond::before{
+	content: "\A";
+	white-space: pre;
+}
+
+.dogjobname::after {
+	content: "\A";
+	white-space: pre;
+
+}
 .buildingname::before {
-	content: "\A";
+	content: "\A \A";
 	white-space: pre;
 }
 
-.dogjobname::before {
-	content: "\A";
-	white-space: pre;
-}
-
-.addbutton.removebutton::before{
-	content: "\A";
-	white-space: pre;
-}
 
 textarea {
 	height: auto;
