@@ -1,13 +1,15 @@
 html {
 	margin: auto;
-	padding: 10px;
+	padding: 20px;
+	background: lightgray;
 }
 
 body {
 	display: grid;
-	grid-template-columns: 200px auto 200px;
+	grid-template-columns: 300px auto 300px;
 	grid-template-rows: auto;
-	gap: 20px;
+	gap: 30px;
+	background: lightgray
 }
 
 h1 {
@@ -46,19 +48,35 @@ h2 {
 
 }
 
-.resourcename {
-	padding: 10px;
-	display: inline;
+.listtitle {
+	font-size: 1.1em;
 }
-
-.resourcename::before {
+.resourcename::after {
 	content: "\A";
 	white-space: pre;
 }
 
-.resourcevalue::after {
-	content: "\a";
+.resourcevalue:not(.TotalDogs)::after {
+	content: "\A";
 	white-space: pre;
+}
+
+.resourcepersecond {
+	padding-left: 10px;
+}
+
+.buildingname::before {
+	content: "\A \A";
+	white-space: pre;
+}
+
+.buildingname::after {
+	content: "\A";
+	white-space: pre;
+}
+
+.buildingname {
+	font-size: 1.1em;
 }
 
 .buildingdescription::before{
@@ -76,15 +94,17 @@ h2 {
 	white-space: pre;
 }
 
-.dogjobname::after {
+.dogjobname:not(:first-child)::before {
+	content: "\A";
+	white-space: pre;
+}
+
+.dogjobname:not(:first-child)::after {
 	content: "\A";
 	white-space: pre;
 
 }
-.buildingname::before {
-	content: "\A \A";
-	white-space: pre;
-}
+
 
 
 textarea {
