@@ -3,7 +3,8 @@ let treatsButton = document.querySelector(".gettreats")
 let buildingList = document.querySelector(".buildingslist")
 let resourceList = document.querySelector(".resourcelist")
 let dogJobList = document.querySelector(".dogjoblist")
-let linebreak = document.createElement("br")
+let today = new Date();
+let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 //textbox for player
 let textbox = document.querySelector(".dialogue")
 
@@ -35,7 +36,8 @@ let trigger = {
 	firstmessage: false,
 	secondmessage: false,
 	thirdmessage: false,
-	forthmessage: false
+	forthmessage: false,
+	removetreatsbutton: false
 }
 
 //Iterates through all buildings and updates the production value of that resource
@@ -121,7 +123,12 @@ let unlockResource = function(name, value) {
 	resourceStats.push(arrayelement)
 
 	let newresource = document.createElement("span")	
-	newresource.innerText = name + ": "
+	if (name == "Dogs") {
+		newresource.innerText = "Available Dogs: "
+	}
+	else {
+		newresource.innerText = name + ": "	
+	}
 	newresource.classList.add("resourcename")
 	newresource.classList.add(name)
 	
@@ -139,8 +146,13 @@ let unlockResource = function(name, value) {
 
 	newresource.append(newresourcevalue)
 	newresource.append(newresourcepersecond)
-	newresource.append(" /s")
-	resourceList.append(newresource)
+	newresource.append(" /s ")
+	if (name == "Dogs") {
+		dogJobList.append(newresource)
+	}
+	else {
+		resourceList.append(newresource)
+	}
 }
 
 //Dynamically adds new buildings and gives them functionality
@@ -257,7 +269,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 	if (resource != null) {
 		buildingbody.append(buildingratepersecond)
 		buildingbody.append(" " + resource)
-		buildingbody.append(" /s")
+		buildingbody.append(" /s ")
 	}
 	buildingbody.append(buildingdescription)
 		buildingbody.append(buildingcost)
@@ -301,7 +313,10 @@ let unlockDogJob = function(name,resource,rate) {
 		}
 	}
 
-	let joblist = document.querySelector(".dogjoblist")
+	let dogjobitem = document.createElement("div")
+	dogjobitem.classList.add("card-body")
+	dogjobitem.classList.add("dogjobitem")
+	
 	let arrayelement = new DogJobs(name, resource, rate)
 	dogjobStats.push(arrayelement)
 
@@ -309,6 +324,7 @@ let unlockDogJob = function(name,resource,rate) {
 	newdogjob.innerText = name + "  x"
 	newdogjob.classList.add("dogjobname")
 	newdogjob.classList.add(name)
+	newdogjob.classList.add("card-text")
 
 	let newdogjobvalue = document.createElement("span")
 	newdogjobvalue.setAttribute("type", "number")
@@ -323,7 +339,7 @@ let unlockDogJob = function(name,resource,rate) {
 	addbutton.classList.add("btn-info")
 	addbutton.classList.add("dogjobbutton")
 	addbutton.setAttribute("type", "button")
-	addbutton.innerText = "Add Dog"
+	addbutton.innerText = "+"
 
 	let removebutton = document.createElement("button")
 	removebutton.addEventListener("click", removeDog)
@@ -332,7 +348,11 @@ let unlockDogJob = function(name,resource,rate) {
 	removebutton.classList.add("btn")
 	removebutton.classList.add("btn-secondary")
 	removebutton.setAttribute("type", "button")	
-	removebutton.innerText = "Remove Dog"
+	removebutton.innerText = "-"
+
+	let buttons = document.createElement("span")
+	buttons.classList.add("dogjobbuttonsbox")
+	buttons.classList.add("card-text")
 
 	//Checks if the dog actually produces anything
 	let dogratepersecond = document.createElement("span")
@@ -346,11 +366,14 @@ let unlockDogJob = function(name,resource,rate) {
 	newdogjob.append(newdogjobvalue)
 	if (resource != null) {
 		newdogjob.append(dogratepersecond)
-		newdogjob.append(" " + resource + " /s")
+		newdogjob.append(" " + resource + " /s ")
 	}
-	joblist.append(newdogjob)
-	joblist.append(addbutton)
-	joblist.append(removebutton)
+	dogjobitem.append(newdogjob)
+	buttons.append(addbutton)
+	buttons.append(" ")
+	buttons.append(removebutton)
+	dogjobitem.append(buttons)
+	dogJobList.append(dogjobitem)
 }
 
 //Calculates running total of dogs with all thier jobs
@@ -409,20 +432,32 @@ let increment = function() {
 				}
 			} 	
 			elementValue.innerText = Math.floor(element.value)
-			elementPerSecond.innerText = element.persecond + dogincrease() - dognoms
+			let truerate = element.persecond + dogincrease() - dognoms
+			elementPerSecond.innerText = truerate
 			
+			//Removes treats button if treat production is high enough
+			if (truerate >= 20 && trigger.removetreatsbutton == false) {
+				trigger.removetreatsbutton = true
+				let buildinglist = document.querySelector(".buildingsblock")
+				buildinglist.removeChild(treatsButton)
+			}
+			else if (truerate < 20 && trigger.removetreatsbutton == true) {
+				trigger.removetreatsbutton = false
+				let buildinglist = document.querySelector(".buildingsblock")
+				buildinglist.prepend(treatsButton)
+			}
 			//alerts player of negative treats
 			if (elementPerSecond.innerText < 0 && trigger.negativeTreats == false) {
 				trigger.negativeTreats = true
 				textbox.append("\n \n")
-				textbox.append("Oh no, the dogs are eating more treats than they produce!")
+				textbox.append(time + ": Oh no, the dogs are eating more treats than they produce!")
 				textbox.append("\n")
 				textbox.append("Dogs will start to die if there aren't enough treats")
 			}
 			else if (elementPerSecond.innerText > 0 && trigger.negativeTreats == true) {
 				trigger.negativeTreats = false
 				textbox.append("\n \n")
-				textbox.append("Dogs celebrate as there is enough for all to eat!")
+				textbox.append(time + ": Dogs celebrate as there is enough for all to eat!")
 			}
 		}
 
@@ -455,10 +490,6 @@ let increment = function() {
 	dogvalue.innerText = Math.floor(dogs.value)
 	console.log(resourceStats)
 
-
-
-
-
 	//Triggers Cat attack on random values
 	if (trigger.catAttack == true) {
 		let randomNumber = Math.floor(Math.random() * 40) + 1
@@ -471,14 +502,14 @@ let increment = function() {
 		}
 		if (randomNumber <= goldMonument.number) {
 			textbox.append("\n \n")
-			textbox.append("The cats have attacked!")
+			textbox.append(time + ": The cats have attacked!")
 			let catAttack = goldMonument.number
 			let difference = guard.number - catAttack
 
 			//battle results are calculated
 			if (difference >= 0) {
 				textbox.append("\n")
-				textbox.append("The dogs have defended the attack!")
+				textbox.append(time + ": The dogs have defended the attack!")
 			}
 
 			//lives are lost in Guard Dogs > regular Dogs > other Dogs
@@ -515,11 +546,11 @@ let increment = function() {
 				}
 				if (totaldeaths == 1) {
 					textbox.append("\n")
-					textbox.append("A dog has lost its life in battle...")
+					textbox.append(time + ": A dog has lost its life in battle...")
 				}
 				else {
 					textbox.append("\n")
-					textbox.append(totaldeaths + " dogs have lost thier lives in the attack... \n \n")
+					textbox.append(time + ": " + totaldeaths + " dogs have lost thier lives in the attack... \n \n")
 				}
 			}
 		}
@@ -553,13 +584,13 @@ let unlocklist = function(name, resource, rate) {
 			let dogs = findResource("Dogs")
 			dogs.persecond += 1
 			textbox.append("\n \n")
-			textbox.append("The dogs are attracted to your treat farms!")
+			textbox.append(time + ": The dogs are attracted to your treat farms!")
 			textbox.scrollTop = textbox.scrollHeight 
 			
 			unlockBuilding("Burrows", 1, null, 0, 0, 5, 1.2, "Sticks", 0, null, 
 				"A cheap and easy home made by digging a hole and putting some sticks in it. Can hold 5 dogs each")
 			textbox.append("\n \n")
-			textbox.append("The dog has built a nearby burrow as a home.")	
+			textbox.append(time + ": The dog has built a nearby burrow as a home.")	
 			textbox.scrollTop = textbox.scrollHeight 
 
 			//creates Total Dog count
@@ -584,14 +615,14 @@ let unlocklist = function(name, resource, rate) {
 			trigger.dogFarmer = true
 			unlockDogJob("DogFarmer","Treats", 2)
 			textbox.append("\n \n")
-			textbox.append("The dogs have learned how to treats into more treats")
+			textbox.append(time + ": The dogs have learned how to treats into more treats")
 			textbox.scrollTop = textbox.scrollHeight 
 		}	
 		if (findBuilding("Burrows").number >= 1 && trigger.dogFetcher == false) {
 			trigger.dogFetcher = true
 			unlockDogJob("DogFetcher","Sticks", 2)
 			textbox.append("\n \n")
-			textbox.append("Dogs like to fetch sticks!")
+			textbox.append(time + ": Dogs like to fetch sticks!")
 			
 			textbox.scrollTop = textbox.scrollHeight 
 		}
@@ -610,7 +641,7 @@ let unlocklist = function(name, resource, rate) {
 			trigger.guardDog = true
 			unlockDogJob("GuardDog", null, 0)
 			textbox.append("\n \n")
-			textbox.append("The population is becoming pretty big, you might need protection")
+			textbox.append(time + ": The population is becoming pretty big, you might need protection")
 			textbox.scrollTop = textbox.scrollHeight
 		}
 
@@ -624,7 +655,7 @@ let unlocklist = function(name, resource, rate) {
 			unlockResource("Gold", 1)
 			unlockDogJob("Miner", "Gold", 1)
 			textbox.append("\n \n")
-			textbox.append("A dog has come with a gold bar?")
+			textbox.append(time + ": A dog has come with a gold bar?")
 			textbox.scrollTop = textbox.scrollHeight
 		}
 	}
@@ -635,7 +666,7 @@ let unlocklist = function(name, resource, rate) {
 			unlockBuilding("GoldMonument", 0, null, 0, 0, 20, 1.1, "Gold", 30, "Logs",
 				"A mysterious and intricate machine. Who knows what it does?")
 			textbox.append("\n \n")
-			textbox.append("A dog had brought back some blueprints of a strange device")
+			textbox.append(time + ": A dog had brought back some blueprints of a strange device")
 			textbox.scrollTop = textbox.scrollHeight
 		}
 	}
@@ -669,32 +700,32 @@ let unlocklist = function(name, resource, rate) {
 		if (findBuilding("GoldMonument").number >= 1 && trigger.firstmessage == false) {
 			trigger.firstmessage = true
 			textbox.append("\n \n")
-			textbox.append("Something stirs in the air as the first monument is erected...")
+			textbox.append(time + ": Something stirs in the air as the first monument is erected...")
 			textbox.scrollTop = textbox.scrollHeight
 
 		} 
 		if (findBuilding("GoldMonument").number >= 2 && trigger.secondmessage == false) {
 			trigger.secondmessage = true
 			textbox.append("\n \n")
-			textbox.append("As the second monument is erected, an unsettling breeze blows through the village")
+			textbox.append(time + ": As the second monument is erected, an unsettling breeze blows through the village")
 			textbox.scrollTop = textbox.scrollHeight
 		} 
 		if (findBuilding("GoldMonument").number >= 3 && trigger.thirdmessage == false) {
 			trigger.thirdmessage = true
 			textbox.append("\n \n")
-			textbox.append("Life of the trees nearby are starting to wilt. Dogs are falling ill and a rumor of the 'best dog' starts to spread")
+			textbox.append(time + ": Life of the trees nearby are starting to wilt. Dogs are falling ill and a rumor of the 'best dog' starts to spread")
 			textbox.scrollTop = textbox.scrollHeight
 		} 
 		if (findBuilding("GoldMonument").number >= 4 && trigger.forthmessage == false) {
 			trigger.forthmessage = true
 			textbox.append("\n \n")
-			textbox.append("At the moment of the monument's completion, an eerie silence overtakes all of dogs. In unison they all quietly mutter 'The best dog cometh'")
+			textbox.append(time + ": At the moment of the monument's completion, an eerie silence overtakes all of dogs. In unison they all quietly mutter 'The best dog cometh'")
 			textbox.scrollTop = textbox.scrollHeight
 		} 
 		if (findBuilding("GoldMonument").number >= 5 && trigger.dogGods == false) {
 			trigger.dogGods = true
 			textbox.append("\n \n")
-			textbox.append("You are now the best dog")
+			textbox.append(time + ": You are now the best dog")
 			textbox.scrollTop = textbox.scrollHeight
 
 		}

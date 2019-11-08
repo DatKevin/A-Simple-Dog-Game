@@ -1,6 +1,6 @@
 html {
 	margin: auto;
-	padding: 20px;
+	padding: 50px;
 	background: lightgray;
 }
 
@@ -27,9 +27,12 @@ textarea {
 	grid-row: 2/4; 	
 }
 
-.buildingslist:not(button) {
+.buildingsblock{
 	grid-column: 2/3;
 	grid-row: 2/4;
+}
+
+.buildingslist{
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	grid-template-rows: auto;
@@ -58,10 +61,23 @@ h2 {
 
 }
 
-.buildinglist:first-child {	
-	text-align: center;
+
+
+
+
+.buildingsblock{
+	text-align: left;
 }
 
+
+.buildingsblock.buildingslist{
+	text-align: left;
+}
+
+.buildingsblock::after {
+	content: "\A \A";
+	white-space: pre;
+}
 
 .buildingbutton {
 	float: right;
@@ -87,7 +103,7 @@ h2 {
 
 
 
-.resourcename::after {
+.resourcename:not(.Dogs)::after {
 	content: "\A";
 	white-space: pre;
 }
@@ -98,7 +114,7 @@ h2 {
 }
 
 .resourcepersecond {
-	padding-left: 10px;
+	padding-left: 15px;
 }
 
 
@@ -108,8 +124,14 @@ h2 {
 
 
 
+.dogjobitem { 	
+	display: flex;
+	justify-content: space-between;
+}
 
-
+.card-body.dogjobitem { 	
+	padding: 10px 10px 10px 10px;
+}
 
 .dogjobvalue::after {
 	content: "\A";
@@ -117,13 +139,11 @@ h2 {
 }
 
 
-.dogjobname:not(:first-child)::before {
-	content: "\A";
-	white-space: pre;
-}
 
-.dogjobname:not(:first-child)::after {
-	content: "\A";
-	white-space: pre;
-
+.dogjobbutton {
+	width: 50px;
+	height: 30px;
+	margin: auto;
+	padding: 2px 2px 2px 2px;
+	text-align: center;
 }
