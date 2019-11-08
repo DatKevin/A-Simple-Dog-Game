@@ -1,5 +1,8 @@
 # A Simple Dog Game
 
+## Game Demo
+https://datkevin.github.io/A-Simple-Dog-Game/
+
 ## User Story: 
 Game opens up in the browser as a mostly empty page. The only thing they see is the game title, a button that gets treats and at the bottom of the screen, the goal of the game which is to “become the best dog.” 
 
