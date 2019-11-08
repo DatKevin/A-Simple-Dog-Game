@@ -123,6 +123,8 @@ let unlockResource = function(name, value) {
 	resourceStats.push(arrayelement)
 
 	let newresource = document.createElement("span")	
+
+	//Dogs are a special resource and have other properties
 	if (name == "Dogs") {
 		newresource.innerText = "Available Dogs: "
 	}
@@ -193,6 +195,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 	buildingcost.classList.add(name)
 	buildingcost.setAttribute("type", "number")
 
+	//Checks if building has a second cost to display and use
 	let buildingcost2 = document.createElement("span")
 	if (costresource2 != null || costresource2 != undefined) {
 		buildingcost2.classList.add("buildingcost2")
@@ -391,6 +394,10 @@ let totaldogs = function() {
 let increment = function() {
 	let dogs = findResource("Dogs")
 
+	//increments time for timestamp
+	today = new Date();
+	time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
 
 	//Increments through all resources and increases them appropriately
 	for (let i = 0; i < resourceStats.length; i++) {
@@ -441,6 +448,7 @@ let increment = function() {
 				let buildinglist = document.querySelector(".buildingsblock")
 				buildinglist.removeChild(treatsButton)
 			}
+			//adds if back if production drops too low
 			else if (truerate < 20 && trigger.removetreatsbutton == true) {
 				trigger.removetreatsbutton = false
 				let buildinglist = document.querySelector(".buildingsblock")
@@ -649,7 +657,7 @@ let unlocklist = function(name, resource, rate) {
 		if (totaldogs() >= 15 && trigger.catAttack == false) {
 			trigger.catAttack = true
 		}
-
+		//Dogs will collect gold for monuments
 		if (totaldogs() >= 20 && trigger.gold == false) {
 			trigger.gold = true
 			unlockResource("Gold", 1)
@@ -659,7 +667,7 @@ let unlocklist = function(name, resource, rate) {
 			textbox.scrollTop = textbox.scrollHeight
 		}
 	}
-
+	//If enough gold is collected, then the Monuments unlock
 	if (findResource("Gold") != undefined) {
 		if (findResource("Gold").value >= 10 && trigger.goldMonument == false) {
 			trigger.goldMonument = true
@@ -670,7 +678,7 @@ let unlocklist = function(name, resource, rate) {
 			textbox.scrollTop = textbox.scrollHeight
 		}
 	}
-	
+	//Saved for future end condition
 	if (false) {
 		if (findBuilding("GoldMonument").number >= 1 && trigger.gameEnd == false) {
 			trigger.gameEnd = true
@@ -678,8 +686,8 @@ let unlocklist = function(name, resource, rate) {
 		}
 	}
 
+	//Unlocks logs
 	if (findResource("Sticks") != undefined) {
-
 		if (findResource("Sticks").value >= 20 && trigger.stickBundler == false) {
 			trigger.stickBundler = true
 			unlockResource("Logs", 0)
@@ -688,6 +696,7 @@ let unlocklist = function(name, resource, rate) {
 		}
 	}
 
+	//Unlocks Dog Houses
 	if (findResource("Logs") != undefined) {
 		if (findResource("Logs").value >= 20 && trigger.dogHouse == false) {
 			trigger.dogHouse = true
@@ -696,6 +705,7 @@ let unlocklist = function(name, resource, rate) {
 		}
 	}
 
+	//Messages appear as more Monuments are built and the end of the game is progressed
 	if (findBuilding("GoldMonument") != undefined) {
 		if (findBuilding("GoldMonument").number >= 1 && trigger.firstmessage == false) {
 			trigger.firstmessage = true
@@ -727,6 +737,7 @@ let unlocklist = function(name, resource, rate) {
 			textbox.append("\n \n")
 			textbox.append(time + ": You are now the best dog")
 			textbox.scrollTop = textbox.scrollHeight
+			alert("You win!")
 
 		}
 	}
