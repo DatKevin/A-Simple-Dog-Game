@@ -101,10 +101,13 @@ class Resource {
 		this.base = 0;
 		this.multiplier = 0;
 		this.persecond = 0;
+		this.increasePerSec = 0;
+		this.decreasePerSec = 0;
 	}
 	//updates the rate per second
 	updateResource () {
-		this.persecond = (this.multiplier + 1) * this.base
+		this.increasePerSec = (this.multiplier + 1) * this.base
+		this.persecond = this.increasePerSec - this.decreasePerSec
 	}
 }
 //Makes new Dog Jobs
@@ -139,6 +142,21 @@ let unlockResource = function(name, value) {
 	newresourcevalue.classList.add("resourcevalue")
 	newresourcevalue.classList.add(name)
 	newresourcevalue.setAttribute("type", "number")
+
+	let resourceequation = document.createElement("span")
+	resourceequation.classList.add("resourceequation")
+	resourceequation.classList.add(name)
+
+	let increasePerSec = document.createElement("span")
+	increasePerSec.classList.add("increasepersec")
+	increasePerSec.classList.add(name)
+	increasePerSec.setAttribute("type", "number")
+
+	let decreasePerSec = document.createElement("span")
+	decreasePerSec.classList.add("decreasepersec")
+	decreasePerSec.classList.add(name)
+	decreasePerSec.setAttribute("type", "number")
+
 
 	let newresourcepersecond = document.createElement("span")
 	newresourcepersecond.innerText = 0
