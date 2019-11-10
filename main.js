@@ -157,15 +157,15 @@ let unlockResource = function(name, value) {
 	decreasePerSec.classList.add(name)
 	decreasePerSec.setAttribute("type", "number")
 
-
 	let newresourcepersecond = document.createElement("span")
 	newresourcepersecond.innerText = 0
 	newresourcepersecond.classList.add("resourcepersecond")
 	newresourcepersecond.classList.add(name)
 	newresourcepersecond.setAttribute("type","number")
 
+	resourceequation.append(increasePerSec + " - " + decreasePerSec + " = " newresourcepersecond)
 	newresource.append(newresourcevalue)
-	newresource.append(newresourcepersecond)
+	newresource.append(resourceequation)
 	newresource.append(" /s ")
 	if (name == "Dogs") {
 		dogJobList.append(newresource)
@@ -422,7 +422,10 @@ let increment = function() {
 		let element = resourceStats[i]
 		let elementValue = document.querySelector(".resourcevalue." + element.name)
 		let elementPerSecond = document.querySelector(".resourcepersecond." + element.name)
+		let elementIncrease = document.querySelector(".increasepersec." + element.name)
+		let elementDecrease = document.querySelector(".decreasepersec." + element.name)
 		
+
 		//Increases resources based on what jobs dogs are working
 		let dogincrease = function () {
 			let increase = 0
@@ -437,7 +440,8 @@ let increment = function() {
 		//Dogs eat treats! They will reduce the value of treats
 		if (element.name == "Treats" && dogs != undefined) {
 			let dognoms = totaldogs() * 1
-			element.value += element.persecond + dogincrease() - dognoms		
+			element.decreasePerSec = dognoms
+			element.value += element.persecond + dogincrease() - element.decreasePerSec		
 			//if there aren't enough treats, dogs will start to die
 			if (element.value < 0) {
 				element.value = 0
