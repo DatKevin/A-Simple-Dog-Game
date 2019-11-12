@@ -45,8 +45,8 @@ let updateProductionValues = function() {
 	for(let i = 0; i<buildingStats.length; i++) {
 		let resource = findResource(buildingStats[i].resource)
 		if (resource != undefined) {
-			resource.base = (buildingStats[i].rate * buildingStats[i].number)
-			resource.multiplier = (buildingStats[i].multiplier * buildingStats[i].number)
+			resource.base += buildingStats[i].rate
+			resource.multiplier += buildingStats[i].multiplier
 			resource.updateResource()
 			console.log(buildingStats)
 		}
@@ -152,16 +152,19 @@ let unlockResource = function(name, value) {
 	increasePerSec.classList.add("increasepersec")
 	increasePerSec.classList.add(name)
 	increasePerSec.setAttribute("type", "number")
+	increasePerSec.innerText = 0
 
 	let decreasePerSec = document.createElement("span")
 	decreasePerSec.classList.add("decreasepersec")
 	decreasePerSec.classList.add(name)
 	decreasePerSec.setAttribute("type", "number")
+	decreasePerSec.innerText = 0
 
 	let newresourcepersecond = document.createElement("span")
 	newresourcepersecond.classList.add("resourcepersecond")
 	newresourcepersecond.classList.add(name)
 	newresourcepersecond.setAttribute("type","number")
+	newresourcepersecond.innerText = 0
 
 	resourceequation.append(increasePerSec)
 	resourceequation.append(" - " )
@@ -321,7 +324,7 @@ let unlockDogJob = function(name,resource,rate) {
 			if (arrayelement.resource != null) {
 				dogratepersecond.innerText = arrayelement.number * arrayelement.rate
 				let dogresource = findResource(arrayelement.resource)
-				dogresource.basePerSec += arrayelement.rate
+				dogresource.base += arrayelement.rate
 			}
 		}
 	}
@@ -337,7 +340,7 @@ let unlockDogJob = function(name,resource,rate) {
 			if (arrayelement.resource != null) {
 				dogratepersecond.innerText = arrayelement.number * arrayelement.rate
 				let dogresource = findResource(arrayelement.resource)
-				dogresource.decreasePerSec -= arrayelement.rate
+				dogresource.base -= arrayelement.rate
 			}
 		}
 	}
@@ -444,7 +447,7 @@ let increment = function() {
 			if (element.value < 0) {
 				element.value = 0
 				if (dogs.value > 0) {
-					dogs.value -= 1
+					dogs.decreasePerSec = 1
 					let dogtextvalue = document.querySelector(".resourcevalue.Dogs")
 					dogtextvalue.innerText = dogs.value
 				}
@@ -485,6 +488,7 @@ let increment = function() {
 			}
 			else if (elementPerSecond.innerText > 0 && trigger.negativeTreats == true) {
 				trigger.negativeTreats = false
+				dogs.decreasePerSec = 0
 				textbox.append("\n \n")
 				textbox.append(time + ": Dogs celebrate as there is enough for all to eat!")
 			}
@@ -511,12 +515,12 @@ let increment = function() {
 	}
 	console.log(totaldogs() + " Total dog count")
 	if (totaldogs() >= ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue == 0) {
-		holdvalue = dogs.persecond
-		dogs.persecond = 0
+		holdvalue = dogs.base
+		dogs.base = 0
 		console.log("Stopped")
 	}
 	if (totaldogs() < ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue != 0) {
-		dogs.persecond = holdvalue
+		dogs.base = holdvalue
 		holdvalue = 0
 		console.log("Continue")
 	}
