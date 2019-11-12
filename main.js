@@ -108,6 +108,7 @@ class Resource {
 	updateResource () {
 		this.increasePerSec = (this.multiplier + 1) * this.base
 		this.persecond = this.increasePerSec - this.decreasePerSec
+		this.value += this.persecond
 	}
 }
 //Makes new Dog Jobs
@@ -158,12 +159,15 @@ let unlockResource = function(name, value) {
 	decreasePerSec.setAttribute("type", "number")
 
 	let newresourcepersecond = document.createElement("span")
-	newresourcepersecond.innerText = 0
 	newresourcepersecond.classList.add("resourcepersecond")
 	newresourcepersecond.classList.add(name)
 	newresourcepersecond.setAttribute("type","number")
 
-	resourceequation.append(increasePerSec + " - " + decreasePerSec + " = " newresourcepersecond)
+	resourceequation.append(increasePerSec)
+	resourceequation.append(" - " )
+	resourceequation.append(decreasePerSec) 
+	resourceequation.append(" = ")
+	resourceequation.append(newresourcepersecond)
 	newresource.append(newresourcevalue)
 	newresource.append(resourceequation)
 	newresource.append(" /s ")
@@ -316,6 +320,8 @@ let unlockDogJob = function(name,resource,rate) {
 			newdogjobvalue.innerText = arrayelement.number
 			if (arrayelement.resource != null) {
 				dogratepersecond.innerText = arrayelement.number * arrayelement.rate
+				let dogresource = findResource(arrayelement.resource)
+				dogresource.basePerSec += arrayelement.rate
 			}
 		}
 	}
@@ -330,6 +336,8 @@ let unlockDogJob = function(name,resource,rate) {
 			newdogjobvalue.innerText = arrayelement.number
 			if (arrayelement.resource != null) {
 				dogratepersecond.innerText = arrayelement.number * arrayelement.rate
+				let dogresource = findResource(arrayelement.resource)
+				dogresource.decreasePerSec -= arrayelement.rate
 			}
 		}
 	}
@@ -399,13 +407,14 @@ let unlockDogJob = function(name,resource,rate) {
 
 //Calculates running total of dogs with all thier jobs
 let totaldogs = function() {
-	let dogs = findResource("Dogs")
-	let total = 0
-	for (let k = 0; k < dogjobStats.length; k++) {
-		total += dogjobStats[k].number
+	if (findResource("Dogs") != undefined) {
+		let dogs = findResource("Dogs")
+		let total = dogs.value
+		for (let k = 0; k < dogjobStats.length; k++) {
+			total += dogjobStats[k].number
+		}
+		return total
 	}
-	total += dogs.value
-	return total
 }
 
 //Increments the Resources based on thier caclulated amount
@@ -425,23 +434,12 @@ let increment = function() {
 		let elementIncrease = document.querySelector(".increasepersec." + element.name)
 		let elementDecrease = document.querySelector(".decreasepersec." + element.name)
 		
-
-		//Increases resources based on what jobs dogs are working
-		let dogincrease = function () {
-			let increase = 0
-			for (let k = 0; k < dogjobStats.length; k++) {
-				if (dogjobStats[k].resource == element.name) {
-					increase += dogjobStats[k].rate * dogjobStats[k].number
-				}			
-			}
-			return increase	
-		}
-
 		//Dogs eat treats! They will reduce the value of treats
 		if (element.name == "Treats" && dogs != undefined) {
 			let dognoms = totaldogs() * 1
 			element.decreasePerSec = dognoms
-			element.value += element.persecond + dogincrease() - element.decreasePerSec		
+			element.updateResource()
+
 			//if there aren't enough treats, dogs will start to die
 			if (element.value < 0) {
 				element.value = 0
@@ -461,17 +459,18 @@ let increment = function() {
 				}
 			} 	
 			elementValue.innerText = Math.floor(element.value)
-			let truerate = element.persecond + dogincrease() - dognoms
-			elementPerSecond.innerText = truerate
+			elementPerSecond.innerText = element.persecond
+			elementIncrease.innerText = element.increasePerSec
+			elementDecrease.innerText = element.decreasePerSec
 			
 			//Removes treats button if treat production is high enough
-			if (truerate >= 20 && trigger.removetreatsbutton == false) {
+			if (element.persecond >= 20 && trigger.removetreatsbutton == false) {
 				trigger.removetreatsbutton = true
 				let buildinglist = document.querySelector(".buildingsblock")
 				buildinglist.removeChild(treatsButton)
 			}
 			//adds if back if production drops too low
-			else if (truerate < 20 && trigger.removetreatsbutton == true) {
+			else if (element.persecond < 20 && trigger.removetreatsbutton == true) {
 				trigger.removetreatsbutton = false
 				let buildinglist = document.querySelector(".buildingsblock")
 				buildinglist.prepend(treatsButton)
@@ -491,11 +490,14 @@ let increment = function() {
 			}
 		}
 
-		//updates the value of the resource on the page
-		else{
-			element.value += element.persecond + dogincrease()
+		//updates the value of the resource on the page as normal
+		else {
+			element.updateResource()
 			elementValue.innerText = Math.floor(element.value)
-			elementPerSecond.innerText = element.persecond + dogincrease()
+			elementPerSecond.innerText = element.persecond
+			elementIncrease.innerText = element.increasePerSec
+			elementDecrease.innerText = element.decreasePerSec
+			
 		}
 	}
 
@@ -503,9 +505,11 @@ let increment = function() {
 	//Caps the number of dogs = to the value of the burrows and dog houses
 	let burrows = findBuilding("Burrows")
 	let doghouse = findBuilding("DogHouse")
+	///Doesn't throw undefined error if buildings haven't been unlocked yet
 	if (doghouse == undefined) {
 		doghouse = {number:0}
 	}
+	console.log(totaldogs() + " Total dog count")
 	if (totaldogs() >= ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue == 0) {
 		holdvalue = dogs.persecond
 		dogs.persecond = 0
@@ -612,7 +616,7 @@ let unlocklist = function(name, resource, rate) {
 			
 			unlockResource("Dogs", 1)
 			let dogs = findResource("Dogs")
-			dogs.persecond += 1
+			dogs.base += 1
 			textbox.append("\n \n")
 			textbox.append(time + ": The dogs are attracted to your treat farms!")
 			textbox.scrollTop = textbox.scrollHeight 
@@ -647,17 +651,18 @@ let unlocklist = function(name, resource, rate) {
 			textbox.append("\n \n")
 			textbox.append(time + ": The dogs have learned how to treats into more treats")
 			textbox.scrollTop = textbox.scrollHeight 
-		}	
+		}		
+	}
+
+	if (findBuilding("Burrows") != undefined) {
 		if (findBuilding("Burrows").number >= 1 && trigger.dogFetcher == false) {
 			trigger.dogFetcher = true
 			unlockDogJob("DogFetcher","Sticks", 2)
 			textbox.append("\n \n")
 			textbox.append(time + ": Dogs like to fetch sticks!")
-			
 			textbox.scrollTop = textbox.scrollHeight 
 		}
 	}
-
 
 	//Dogs like to fetch sticks
 	if (findResource("Dogs") != undefined) {
