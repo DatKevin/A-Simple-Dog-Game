@@ -12,6 +12,7 @@ let textbox = document.querySelector(".dialogue")
 let buildingStats = []
 let resourceStats = []
 let dogjobStats = []
+let caps = []
 
 //Used for capping total number of dogs with thier jobs
 let holdvalue = 0
@@ -28,7 +29,6 @@ let trigger = {
 	catAttack: false,
 	gold: false,
 	goldMonument: false,
-	gameEnd: false,
 	stickBundler: false,
 	negativeTreats: false,
 	dogHouse:false,
@@ -40,18 +40,6 @@ let trigger = {
 	removetreatsbutton: false
 }
 
-//Iterates through all buildings and updates the production value of that resource
-let updateProductionValues = function() {
-	for(let i = 0; i<buildingStats.length; i++) {
-		let resource = findResource(buildingStats[i].resource)
-		if (resource != undefined) {
-			resource.base += buildingStats[i].rate
-			resource.multiplier += buildingStats[i].multiplier
-			resource.updateResource()
-			console.log(buildingStats)
-		}
-	}	
-}
 //Instntly pulls resource/building/dog job stats from array
 let findResource = function(name) {
 	for (let i = 0; i < resourceStats.length; i++) {
@@ -74,12 +62,28 @@ let findDogJob = function(name) {
 		}
 	}
 }
-
-
+let findCap = function(name) {
+	let total = 0
+	for (let i = 0; i < caps.length; i++) {
+		if (caps[i].resource == name) {
+			total += caps[i].totalcap
+			console.log()
+		}
+	}
+	return total
+}
+let findBuildinginCap = function(name) {
+	for (let i = 0; i <caps.length; i++) {
+		if (caps[i].name == name) {
+			return caps[i]
+		}
+	}
+}
 //Makes buildings. Rate is Addictive while multiplier is multiplicative.
 class Building {
 	constructor(name, number, resource, rate, multiplier, cost, 
-				costgrowth, costresource, cost2, costresource2, description) {
+				costgrowth, costresource, cost2, costresource2, 
+				cap, capby, description) {
 		this.name = name;
 		this.number = number;
 		this.resource = resource;
@@ -91,6 +95,7 @@ class Building {
 		this.cost2 = cost2
 		this.costresource2 = costresource2
 		this.description = description
+		this.cap = cap
 	}
 }
 //Makes resources and allows for adding new resources and updates
@@ -105,19 +110,33 @@ class Resource {
 		this.decreasePerSec = 0;
 	}
 	//updates the rate per second
-	updateResource () {
+	updateResource() {
 		this.increasePerSec = (this.multiplier + 1) * this.base
 		this.persecond = this.increasePerSec - this.decreasePerSec
 		this.value += this.persecond
 	}
 }
 //Makes new Dog Jobs
-class DogJobs {
+class DogJob {
 	constructor(name, resource, rate) {
 		this.name = name
 		this.number = 0
 		this.resource = resource
 		this.rate = rate
+	}
+}
+//Special class for structures that limit total resources
+class ValueCap {
+	constructor(name, resource, number, capsby) {
+		this.name = name
+		this.number = number
+		this.resource = resource
+		this.capsby = capsby
+		this.totalcap = 0
+	}
+	//Updates the cap per item
+	updateCap() {
+		this.totalcap = this.number * this.capsby
 	}
 }
 
@@ -183,12 +202,13 @@ let unlockResource = function(name, value) {
 }
 
 //Dynamically adds new buildings and gives them functionality
-let unlockBuilding = function(name, number, resource, rate, multiplier, 
-	cost, costgrowth, costresource, cost2, costresource2, description) {
+let unlockBuilding = function(name, number, resource, rate, 
+	multiplier, cost, costgrowth, costresource, cost2, 
+	costresource2, cap, capby, description) {
 
 	//creates the new building and dynamically adds it to the list
 	let arrayelement = new Building(name, number, resource, rate, multiplier, 
-		cost, costgrowth, costresource, cost2, costresource2, description)
+		cost, costgrowth, costresource, cost2, costresource2, cap, capby, description)
 	buildingStats.push(arrayelement)
 	
 	let newbuilding = document.createElement("span")
@@ -220,6 +240,12 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 	buildingcost.classList.add(name)
 	buildingcost.setAttribute("type", "number")
 
+	//Checks if the building caps other resources
+	if (cap == true) {
+		let newcap = new ValueCap(name, resource, number, capby)
+		caps.push(newcap)
+	}
+
 	//Checks if building has a second cost to display and use
 	let buildingcost2 = document.createElement("span")
 	if (costresource2 != null || costresource2 != undefined) {
@@ -231,11 +257,29 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 			+ Math.floor(arrayelement.cost2) + " " + costresource2
 	}
 
+	//Iterates through all buildings and updates the production value of that resource
+	let updateProductionValues = function() {
+		for(let i = 0; i<buildingStats.length; i++) {
+			let resource = findResource(buildingStats[i].resource)
+			if (resource != undefined) {
+				resource.base += buildingStats[i].rate
+				resource.multiplier += buildingStats[i].multiplier
+				resource.updateResource()
+				console.log(buildingStats)
+			}
+		}	
+	}
+
 	//Checks if the cost for the building is available and reduces resources accordingly
 	let addnew = function() {
 		let resource = findResource(arrayelement.costresource)
 		if (resource.value >= arrayelement.cost) {	
 			arrayelement.number += 1
+			if (arrayelement.cap == true) {
+				let buildinginCap = findBuildinginCap(arrayelement.name)
+				buildinginCap.number += 1
+				buildinginCap.updateCap()
+			}
 			resource.value -= arrayelement.cost
 			let resourceValueText = document.querySelector(".resourcevalue." + resource.name)
 			resourceValueText.innerText = Math.floor(resource.value)
@@ -259,7 +303,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 				+ " " + arrayelement.costresource
 			}
 
-			if (resource != null) {
+			if (resource != null || cap != true) {
 				buildingratepersecond.innerText = arrayelement.number * arrayelement.rate
 			}
 			updateProductionValues()
@@ -285,7 +329,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 
 	//checks if the building actually produces anything
 	let buildingratepersecond = document.createElement("span")
-	if (resource != null) {
+	if (resource != null || cap != true) {
 		buildingratepersecond.innerText = rate
 		buildingratepersecond.classList.add("buildingratepersecond")
 		buildingratepersecond.classList.add(name)
@@ -294,7 +338,7 @@ let unlockBuilding = function(name, number, resource, rate, multiplier,
 
 	buildingbody.append(buildingname)
 	buildingname.append(buildingnumber)
-	if (resource != null) {
+	if (resource != null || cap != true) {
 		buildingbody.append(buildingratepersecond)
 		buildingbody.append(" " + resource)
 		buildingbody.append(" /s ")
@@ -349,7 +393,7 @@ let unlockDogJob = function(name,resource,rate) {
 	dogjobitem.classList.add("card-body")
 	dogjobitem.classList.add("dogjobitem")
 	
-	let arrayelement = new DogJobs(name, resource, rate)
+	let arrayelement = new DogJob(name, resource, rate)
 	dogjobStats.push(arrayelement)
 
 	let newdogjob = document.createElement("span")
@@ -423,7 +467,6 @@ let totaldogs = function() {
 //Increments the Resources based on thier caclulated amount
 let increment = function() {
 	let dogs = findResource("Dogs")
-
 	//increments time for timestamp
 	today = new Date();
 	time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -497,16 +540,27 @@ let increment = function() {
 		//updates the value of the resource on the page as normal
 		else {
 			element.updateResource()
+			//Caps resource if there is a cap
 			elementValue.innerText = Math.floor(element.value)
 			elementPerSecond.innerText = element.persecond
 			elementIncrease.innerText = element.increasePerSec
 			elementDecrease.innerText = element.decreasePerSec
 			
 		}
+
+		//increments and updates all caps
+		for (let i = 0; i < caps.length; i++) {
+			caps[i].updateCap()
+		}
+		let currentcap = findCap(element.name)
+		console.log("Current Cap: " + currentcap + " " + element.name)
+		if (currentcap != 0 && element.value > currentcap) {
+			element.value = currentcap
+			console.log("Capped " + element.name)
+		}
 	}
 
-
-	//Caps the number of dogs = to the value of the burrows and dog houses
+/*
 	let burrows = findBuilding("Burrows")
 	let doghouse = findBuilding("DogHouse")
 	///Doesn't throw undefined error if buildings haven't been unlocked yet
@@ -527,6 +581,9 @@ let increment = function() {
 	let dogvalue = document.querySelector(".resourcevalue.Dogs")
 	dogvalue.innerText = Math.floor(dogs.value)
 	console.log(resourceStats)
+*/
+		console.log(resourceStats)
+		console.log(caps)
 
 	//Triggers Cat attack on random values
 	if (trigger.catAttack == true) {
@@ -609,7 +666,7 @@ let unlocklist = function(name, resource, rate) {
 	//Treat Farm unlocks once x Treats have been obtained
 	if (findResource("Treats").value >= 5 && trigger.treatFarm == false) {
 		trigger.treatFarm = true
-		unlockBuilding("TreatsFarm", 0, "Treats", 1.25, 0, 3, 1.1, "Treats", 0, null, 
+		unlockBuilding("TreatsFarm", 0, "Treats", 1.25, 0, 3, 1.1, "Treats", 0, null, false, 0,
 			"A quaint farm to grow more dog treats")
 	}
 
@@ -625,8 +682,8 @@ let unlocklist = function(name, resource, rate) {
 			textbox.append(time + ": The dogs are attracted to your treat farms!")
 			textbox.scrollTop = textbox.scrollHeight 
 			
-			unlockBuilding("Burrows", 1, null, 0, 0, 5, 1.2, "Sticks", 0, null, 
-				"A cheap and easy home made by digging a hole and putting some sticks in it. Can hold 5 dogs each")
+			unlockBuilding("Burrows", 1, "Dogs", 0, 0, 5, 1.2, "Sticks", 0, null, true, 5,
+				"A cheap and easy home made by digging a hole and putting some sticks in it. Can hold 5 dogs each", true)
 			textbox.append("\n \n")
 			textbox.append(time + ": The dog has built a nearby burrow as a home.")	
 			textbox.scrollTop = textbox.scrollHeight 
@@ -702,18 +759,11 @@ let unlocklist = function(name, resource, rate) {
 	if (findResource("Gold") != undefined) {
 		if (findResource("Gold").value >= 10 && trigger.goldMonument == false) {
 			trigger.goldMonument = true
-			unlockBuilding("GoldMonument", 0, null, 0, 0, 20, 1.1, "Gold", 30, "Logs",
+			unlockBuilding("GoldMonument", 0, null, 0, 0, 20, 1.1, "Gold", 30, "Logs", false, 0,
 				"A mysterious and intricate machine. Who knows what it does?")
 			textbox.append("\n \n")
 			textbox.append(time + ": A dog had brought back some blueprints of a strange device")
 			textbox.scrollTop = textbox.scrollHeight
-		}
-	}
-	//Saved for future end condition
-	if (false) {
-		if (findBuilding("GoldMonument").number >= 1 && trigger.gameEnd == false) {
-			trigger.gameEnd = true
-			alert("You won!")
 		}
 	}
 
@@ -722,7 +772,7 @@ let unlocklist = function(name, resource, rate) {
 		if (findResource("Sticks").value >= 20 && trigger.stickBundler == false) {
 			trigger.stickBundler = true
 			unlockResource("Logs", 0)
-			unlockBuilding("StickBundler", 0, "Logs", 1, 0, 10, 1.25, "Sticks", 0, null,
+			unlockBuilding("StickBundler", 0, "Logs", 1, 0, 10, 1.25, "Sticks", 0, null, false, 0,
 				"Turns big unusable sticks to bigger but usuable sticks")
 		}
 	}
@@ -731,7 +781,7 @@ let unlocklist = function(name, resource, rate) {
 	if (findResource("Logs") != undefined) {
 		if (findResource("Logs").value >= 20 && trigger.dogHouse == false) {
 			trigger.dogHouse = true
-			unlockBuilding("DogHouse", 0, null, 0, 0, 15, 1.5, "Logs", 50, "Treats",
+			unlockBuilding("DogHouse", 0, "Dogs", 10, 0, 15, 1.5, "Logs", 50, "Treats", true, 10,
 				"A home made for a very good dog, or at least 10 of them")
 		}
 	}
