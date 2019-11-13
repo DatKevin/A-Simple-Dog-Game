@@ -15,7 +15,7 @@ let dogjobStats = []
 let caps = []
 
 //Used for capping total number of dogs with thier jobs
-let holdvalue = 0
+let holdDogValue = 0
 
 //Unlockables start off as false and turn true as they become unlocked
 let trigger = {
@@ -483,8 +483,8 @@ let increment = function() {
 		//Dogs eat treats! They will reduce the value of treats
 		if (element.name == "Treats" && dogs != undefined) {
 			let dognoms = totaldogs() * 1
-			element.decreasePerSec = dognoms
 			element.updateResource()
+			element.value -= dognoms
 
 			//if there aren't enough treats, dogs will start to die
 			if (element.value < 0) {
@@ -505,9 +505,9 @@ let increment = function() {
 				}
 			} 	
 			elementValue.innerText = Math.floor(element.value)
-			elementPerSecond.innerText = element.persecond
+			elementPerSecond.innerText = element.persecond - dognoms
 			elementIncrease.innerText = element.increasePerSec
-			elementDecrease.innerText = element.decreasePerSec
+			elementDecrease.innerText = element.decreasePerSec + dognoms
 			
 			//Removes treats button if treat production is high enough
 			if (element.persecond >= 20 && trigger.removetreatsbutton == false) {
@@ -540,51 +540,42 @@ let increment = function() {
 		//updates the value of the resource on the page as normal
 		else {
 			element.updateResource()
-			//Caps resource if there is a cap
 			elementValue.innerText = Math.floor(element.value)
 			elementPerSecond.innerText = element.persecond
 			elementIncrease.innerText = element.increasePerSec
 			elementDecrease.innerText = element.decreasePerSec
-			
 		}
 
-		//increments and updates all caps
+		//Caps resources if caps are present
 		for (let i = 0; i < caps.length; i++) {
 			caps[i].updateCap()
 		}
 		let currentcap = findCap(element.name)
-		console.log("Current Cap: " + currentcap + " " + element.name)
-		if (currentcap != 0 && element.value > currentcap) {
-			element.value = currentcap
-			console.log("Capped " + element.name)
+		//Dogs are special
+		if (element.name == "Dogs") {
+			if (totaldogs() >= currentcap && holdDogValue == 0) {
+				holdDogValue = dogs.base
+				dogs.base = 0
+				console.log("Stopped")
+			}
+			if (totaldogs() < currentcap && holdDogValue != 0) {
+				dogs.base = holdDogValue
+				holdDogValue = 0
+				console.log("Continue")
+			}
+			let dogvalue = document.querySelector(".resourcevalue.Dogs")
+			dogvalue.innerText = Math.floor(dogs.value)
 		}
-	}
-
-/*
-	let burrows = findBuilding("Burrows")
-	let doghouse = findBuilding("DogHouse")
-	///Doesn't throw undefined error if buildings haven't been unlocked yet
-	if (doghouse == undefined) {
-		doghouse = {number:0}
-	}
-	console.log(totaldogs() + " Total dog count")
-	if (totaldogs() >= ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue == 0) {
-		holdvalue = dogs.base
-		dogs.base = 0
-		console.log("Stopped")
-	}
-	if (totaldogs() < ((burrows.number * 5) + (doghouse.number * 10)) && holdvalue != 0) {
-		dogs.base = holdvalue
-		holdvalue = 0
-		console.log("Continue")
-	}
-	let dogvalue = document.querySelector(".resourcevalue.Dogs")
-	dogvalue.innerText = Math.floor(dogs.value)
-	console.log(resourceStats)
-*/
+		else {
+			if (currentcap != 0 && element.value > currentcap) {
+				element.value = currentcap
+				elementValue.innerText = Math.floor(element.value)
+				console.log("Capped " + element.name)
+			}
+		}		
 		console.log(resourceStats)
-		console.log(caps)
-
+	}
+	
 	//Triggers Cat attack on random values
 	if (trigger.catAttack == true) {
 		let randomNumber = Math.floor(Math.random() * 40) + 1
