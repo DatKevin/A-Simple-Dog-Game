@@ -25,10 +25,10 @@ The game will continuously grow as upgrades are unlocked and the dog civilizatio
 
 ## Wireframes:
 ![Image of Opening Page](Pictures/OpeningPage.png)
-Prototype of Home Page
+Prototype of Game Opening
 
 ![Image of Midgame Page](Pictures/ExampleGame.png)
-Prototype of Entry Page
+Prototype of Mid Game with slight Progression
 
 ## Features in Development
 
