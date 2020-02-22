@@ -27,7 +27,7 @@ The game will continuously grow as upgrades are unlocked and the dog civilizatio
 ![Image of Opening Page](Pictures/OpeningPage.png)
 Prototype of Home Page
 
-![Image of Midgame Page](Pictures/Mid-Game-Screen.png)
+![Image of Midgame Page](Pictures/ExampleGame.png)
 Prototype of Entry Page
 
 ## Features in Development
